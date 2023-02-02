@@ -1,10 +1,11 @@
 package router
 
 import (
+	_ "Team2048_Tiktok/docs" // 上一步swagger init 生成的docs也要导入
 	"Team2048_Tiktok/logger"
 	"github.com/gin-gonic/gin"
-	//swaggerFiles "github.com/swaggo/files"
-	//gs "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	gs "github.com/swaggo/gin-swagger"
 	"net/http"
 )
 
@@ -20,7 +21,7 @@ func SetupRouter(mode string) *gin.Engine {
 	//社区分类相关路由
 
 	//swagger接口文档所需要的路由（暂未实现）
-	//r.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
+	r.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
 
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{

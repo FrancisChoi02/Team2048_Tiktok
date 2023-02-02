@@ -53,7 +53,7 @@ type LogConfig struct {
 
 func Init() (err error) {
 
-	//viper.SetConfigFile(filePath) filePath string
+	//从config.yaml配置文件读取配置，反编译到带tag的结构体中
 	viper.SetConfigFile("./conf/config.yaml")
 
 	err = viper.ReadInConfig() // 读取配置信息

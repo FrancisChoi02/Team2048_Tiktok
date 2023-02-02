@@ -1,0 +1,10 @@
+host: 127.0.0.1:8080
+info:
+  contact:
+    name: FrancisChoi
+    url: https://github.com/FrancisChoi02/
+  description: 极简版抖音
+  title: Team2048_Tiktok 项目接口文档
+  version: "1.0"
+paths: {}
+swagger: "2.0"
