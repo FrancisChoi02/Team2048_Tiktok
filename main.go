@@ -2,6 +2,7 @@ package main
 
 import (
 	"Team2048_Tiktok/conf"
+	"Team2048_Tiktok/dao/mysql"
 	"Team2048_Tiktok/dao/redis"
 	"Team2048_Tiktok/handler"
 	"Team2048_Tiktok/logger"
@@ -31,13 +32,11 @@ func main() {
 		return
 	}
 	//加载MySQL
-	/*
-		if err := mysql.Init(conf.Conf.MySQLConfig); err != nil {
-			fmt.Printf("init mysql failed, err:%v\n", err)
-			return
-		}
-		defer mysql.Close() // 程序退出关闭mysql连接
-	*/
+	if err := mysql.Init(conf.Conf.MySQLConfig); err != nil {
+		fmt.Printf("init mysql failed, err:%v\n", err)
+		return
+	}
+	defer mysql.Close() // 程序退出关闭mysql连接
 
 	//加载Redis
 	if err := redis.Init(conf.Conf.RedisConfig); err != nil {

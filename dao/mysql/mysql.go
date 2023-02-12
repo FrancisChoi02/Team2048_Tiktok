@@ -20,6 +20,11 @@ func Init(cfg *conf.MySQLConfig) (err error) {
 	if err != nil {
 		return
 	}
+
+	//自动建表，只需要启动系统就能在本地的MySQL中根据model中的结构体，按照tag的要求建立数据库表
+	//在本地只能 启动一次 ，不需要重复建表
+	//DB.AutoMigrate(&model.User{}, &model.Video{}, &model.Comment{})
+
 	return DB.DB().Ping()
 }
 
