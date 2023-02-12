@@ -21,7 +21,6 @@ import (
 func main() {
 
 	// 加载配置
-	//if err := setting.Init(os.Args[1]); err != nil { //通过命令行加载配置文件路径
 	if err := conf.Init(); err != nil {
 		fmt.Printf("load config failed, err:%v\n", err)
 		return

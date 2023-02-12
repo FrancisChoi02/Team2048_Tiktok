@@ -10,7 +10,7 @@ import (
 //承载配置信息的结构体
 var Conf = new(AppConfig)
 
-//用viper 对应的tag`mapstructure`标记结构体成员， viper可以将从yaml中读取
+//用Viper库 对应的tag`mapstructure`标记结构体成员， 可以使viper将其从yaml中读取
 type AppConfig struct {
 	Name      string `mapstructure:"name"`
 	Mode      string `mapstructure:"mode"`
