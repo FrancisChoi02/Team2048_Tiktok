@@ -8,54 +8,53 @@ import (
 	"go.uber.org/zap"
 )
 
-func UserLoginHandler(c *gin.Context) {
+// UserRegisterHandler 用户注册
+func UserSignUpHandler(c *gin.Context) {
 	//1. 获取参数 和 参数校验
 	var p model.ParamSignUp          //用于获取 request消息 的结构体
 	var res model.UserDetailResponse //用于返回 response消息 的结构体
 
 	if err := c.ShouldBind(&p); err != nil {
-		// 登录参数存在空值
+		// 注册参数存在空值
 		// 获取validator.ValidationErrors类型的errors
 		_, ok := err.(validator.ValidationErrors)
 		if !ok {
 			zap.L().Error("Invalid param", zap.Error(err))
-			ResponseLogin(c, res, CodeInvalidParam) //状态码为 参数错误
+			ResponseSignUp(c, res, CodeInvalidParam) //状态码为 参数错误
 			return
 		}
 		// 参数错误
 		zap.L().Error("SignUp with invalid param", zap.Error(err))
-		ResponseLogin(c, res, CodeInvalidParam)
+		ResponseSignUp(c, res, CodeInvalidParam)
 		return
 	}
 
 	//2. 查找Username是否已经存在
-	if boolValue := logic.CheckUser(p.Username); !boolValue {
+	if boolValue := logic.CheckUser(p.Username); boolValue {
 		// 用户已存在
-		zap.L().Error("logic.CheckUser() failed")
+		zap.L().Error("SignUp with invalid param")
 		//res错误码与错误信息返回
-		ResponseLogin(c, res, CodeUserNotExisted)
+		ResponseSignUp(c, res, CodeUserN)
 		return
 	}
 
-	//3. 获取用户ID
-	tmpUser, err := logic.GetUser_ByName(p.Username)
-	if err != nil {
-		// 用户不存在
-		zap.L().Error("logic.GetUserID()")
-		//res错误码与错误信息返回
-		ResponseLogin(c, res, CodeUserNotExisted)
-		return
+	//3. 分发用户ID
+	tmpID := model.GenID()
+
+	//4. 将新用户信息添加到数据库中
+	if err := logic.SignUp(tmpID, p.Username, p.Password); err != nil {
+		zap.L().Error("logic.SignUp() failed", zap.Error(err))
 	}
 
-	//4. 颁发token
+	//5. 颁发token
 	token, err := middleware.ReleaseToken(tmpID)
 	if err != nil {
 		zap.L().Error("middleware.ReleaseToken() failed", zap.Error(err))
-		ResponseLogin(c, res, CodeSignUpSuccess)
+		ResponseSignUp(c, res, CodeSignUpSuccess)
 	}
 
-	//5. 返回登录成功的响应
-	res.User_id = tmpUser //此处要改为 tmpUser.Id
+	//6. 返回注册成功的响应
+	res.User_id = tmpID
 	res.Token = token
-	ResponseLogin(c, res, CodeSignUpSuccess)
+	ResponseSignUp(c, res, CodeSignUpSuccess)
 }

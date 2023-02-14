@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"Team2048_Tiktok/model"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"time"
@@ -16,11 +15,11 @@ type MyClaims struct {
 }
 
 // ReleaseToken	颁发JWT token
-func ReleaseToken(user model.User) (string, error) {
+func ReleaseToken(id int64) (string, error) {
 	//创建一个自己的声明
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := &MyClaims{
-		UserId: user.Id,
+		UserId: id,
 
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

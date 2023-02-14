@@ -23,8 +23,8 @@ func SetupRouter(mode string) *gin.Engine {
 	userAPI := r.Group("/douyin/user")
 	{
 		userAPI.GET("/", middleware.JWTMiddleware(), handler.UserInfoHandler)
-		userAPI.POST("=/login/", handler.UserLoginHandler)
-		userAPI.POST("=/register/", handler.UserRegisterHandler)
+		userAPI.POST("/login/", handler.UserLoginHandler)
+		userAPI.POST("/register/", handler.UserSignUpHandler)
 	}
 
 	//videoAPI := r.Group("/douyin/publish")

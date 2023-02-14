@@ -6,6 +6,7 @@ import (
 	"Team2048_Tiktok/dao/redis"
 	"Team2048_Tiktok/handler"
 	"Team2048_Tiktok/logger"
+	"Team2048_Tiktok/model"
 	"Team2048_Tiktok/router"
 	"fmt"
 )
@@ -43,6 +44,12 @@ func main() {
 		return
 	}
 	defer redis.Close() // 程序退出关闭redis数据库连接
+
+	// 初始化ID生成器
+	if err := model.ID_Init(conf.Conf.StartTime, conf.Conf.MachineID); err != nil {
+		fmt.Printf("init snowflake failed, err:%v\n", err)
+		return
+	}
 
 	//加载validator参数验证器
 	//验证用户用户名、密码的合法性

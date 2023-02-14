@@ -3,6 +3,7 @@ package middleware
 import (
 	"Team2048_Tiktok/handler"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -20,6 +21,7 @@ func JWTMiddleware() gin.HandlerFunc {
 
 		//检验用户JWT分发状况
 		if tokenStr == "" {
+			zap.L().Error("User didn't login")
 			handler.ResponseError(c, handler.CodeUserNotLogin)
 			c.Abort() //阻止执行
 			return
@@ -28,6 +30,7 @@ func JWTMiddleware() gin.HandlerFunc {
 		//验证token合法性
 		token, err := ParseToken(tokenStr)
 		if err != nil {
+			zap.L().Error("Token invalid")
 			handler.ResponseError(c, handler.CodeTokenInvalid)
 			c.Abort() //阻止执行
 			return
@@ -35,6 +38,7 @@ func JWTMiddleware() gin.HandlerFunc {
 
 		//检查token是否过期
 		if time.Now().Unix() > token.ExpiresAt {
+			zap.L().Error("Token is expired")
 			handler.ResponseError(c, handler.CodeTokenExpired)
 			c.Abort() //阻止执行
 			return
