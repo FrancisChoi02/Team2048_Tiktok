@@ -1,4 +1,4 @@
-package handler
+package user
 
 import (
 	"Team2048_Tiktok/model"

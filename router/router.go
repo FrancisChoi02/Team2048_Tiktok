@@ -2,7 +2,7 @@ package router
 
 import (
 	_ "Team2048_Tiktok/docs" // 上一步swagger init 生成的docs也要导入
-	"Team2048_Tiktok/handler"
+	"Team2048_Tiktok/handler/user"
 	"Team2048_Tiktok/logger"
 	"Team2048_Tiktok/middleware"
 	"github.com/gin-gonic/gin"
@@ -22,9 +22,9 @@ func SetupRouter(mode string) *gin.Engine {
 	//基础接口
 	userAPI := r.Group("/douyin/user")
 	{
-		userAPI.GET("/", middleware.JWTMiddleware(), handler.UserInfoHandler)
-		userAPI.POST("/login/", handler.UserLoginHandler)
-		userAPI.POST("/register/", handler.UserSignUpHandler)
+		userAPI.GET("/", middleware.JWTMiddleware(), user.UserInfoHandler)
+		userAPI.POST("/login/", user.UserLoginHandler)
+		userAPI.POST("/register/", user.UserSignUpHandler)
 	}
 
 	//videoAPI := r.Group("/douyin/publish")

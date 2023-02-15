@@ -1,6 +1,7 @@
-package handler
+package user
 
 import (
+	logic "Team2048_Tiktok/logic/user"
 	"Team2048_Tiktok/middleware"
 	"Team2048_Tiktok/model"
 	"github.com/gin-gonic/gin"
@@ -29,32 +30,23 @@ func UserSignUpHandler(c *gin.Context) {
 		return
 	}
 
-	//2. 查找Username是否已经存在
-	if boolValue := logic.CheckUser(p.Username); boolValue {
-		// 用户已存在
-		zap.L().Error("SignUp with invalid param")
-		//res错误码与错误信息返回
-		ResponseSignUp(c, res, CodeUserN)
+	//2. 将新用户信息添加到数据库中
+	tmpId, err := logic.SignUp(&p)
+	if err != nil {
+		zap.L().Error("logic.SignUp() failed", zap.Error(err))
 		return
 	}
 
-	//3. 分发用户ID
-	tmpID := model.GenID()
-
-	//4. 将新用户信息添加到数据库中
-	if err := logic.SignUp(tmpID, p.Username, p.Password); err != nil {
-		zap.L().Error("logic.SignUp() failed", zap.Error(err))
-	}
-
-	//5. 颁发token
-	token, err := middleware.ReleaseToken(tmpID)
+	//3. 颁发token
+	token, err := middleware.ReleaseToken(tmpId)
 	if err != nil {
 		zap.L().Error("middleware.ReleaseToken() failed", zap.Error(err))
-		ResponseSignUp(c, res, CodeSignUpSuccess)
+		ResponseSignUp(c, res, CodeServerBusy)
+		return
 	}
 
-	//6. 返回注册成功的响应
-	res.User_id = tmpID
+	//3. 返回注册成功的响应
+	res.User_id = tmpId
 	res.Token = token
 	ResponseSignUp(c, res, CodeSignUpSuccess)
 }

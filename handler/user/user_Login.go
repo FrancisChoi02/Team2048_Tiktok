@@ -1,7 +1,7 @@
-package handler
+package user
 
 import (
-	"Team2048_Tiktok/middleware"
+	logic "Team2048_Tiktok/logic/user"
 	"Team2048_Tiktok/model"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -28,34 +28,15 @@ func UserLoginHandler(c *gin.Context) {
 		return
 	}
 
-	//2. 查找Username是否已经存在
-	if boolValue := logic.CheckUser(p.Username); !boolValue {
-		// 用户已存在
-		zap.L().Error("logic.CheckUser() failed")
-		//res错误码与错误信息返回
-		ResponseLogin(c, res, CodeUserNotExisted)
-		return
-	}
-
-	//3. 获取用户ID
-	tmpUser, err := logic.GetUser_ByName(p.Username)
+	//2. 登录 并获取用户Id及颁发的Token
+	tmpId, token, err := logic.Login(&p) //这里应该是tmpUser.Id
 	if err != nil {
-		// 用户不存在
-		zap.L().Error("logic.GetUserID()")
-		//res错误码与错误信息返回
-		ResponseLogin(c, res, CodeUserNotExisted)
-		return
-	}
-
-	//4. 颁发token
-	token, err := middleware.ReleaseToken(tmpID)
-	if err != nil {
-		zap.L().Error("middleware.ReleaseToken() failed", zap.Error(err))
+		zap.L().Error("logic.Login() failed", zap.Error(err))
 		ResponseLogin(c, res, CodeSignUpSuccess)
 	}
 
-	//5. 返回登录成功的响应
-	res.User_id = tmpUser //此处要改为 tmpUser.Id
+	//3. 返回登录成功的响应
+	res.User_id = tmpId //此处要改为 tmpUser.Id
 	res.Token = token
 	ResponseLogin(c, res, CodeSignUpSuccess)
 }

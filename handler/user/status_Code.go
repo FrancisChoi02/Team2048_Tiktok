@@ -1,4 +1,4 @@
-package handler
+package user
 
 type StatusCode int32
 

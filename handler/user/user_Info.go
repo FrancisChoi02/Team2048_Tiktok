@@ -1,6 +1,7 @@
-package handler
+package user
 
 import (
+	logic "Team2048_Tiktok/logic/user"
 	"Team2048_Tiktok/model"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -38,7 +39,7 @@ func UserInfoHandler(c *gin.Context) {
 	}
 
 	// 2.获取用户
-	tmpUser, err := logic.GetUser_ByID(p.User_id)
+	tmpUser, err := logic.GetUser(p.User_id)
 	if err != nil {
 		// 用户不存在
 		zap.L().Error("logic.GetUserID()")
@@ -47,15 +48,7 @@ func UserInfoHandler(c *gin.Context) {
 		return
 	}
 
-	// 3.填充用户结构体
-	resUser := new(model.User)
-
-	// 4.返回响应
-	resUser.Id = tmpUser.Id
-	resUser.Name = tmpUser.Name
-	resUser.FollowCount = tmpUser.FollowCount
-	resUser.FollowerCount = tmpUser.FollowerCount
-	resUser.IsFollow = tmpUser.IsFollow
+	// 3.返回响应
+	res.User = tmpUser
 	ResponseInfo(c, res, CodeSignUpSuccess)
-
 }
