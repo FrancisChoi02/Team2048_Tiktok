@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// UserLoginHandler 用户登录
 func UserLoginHandler(c *gin.Context) {
 	//1. 获取参数 和 参数校验
 	var p model.ParamSignUp          //用于获取 request消息 的结构体
@@ -32,11 +33,11 @@ func UserLoginHandler(c *gin.Context) {
 	tmpId, token, err := logic.Login(&p) //这里应该是tmpUser.Id
 	if err != nil {
 		zap.L().Error("logic.Login() failed", zap.Error(err))
-		ResponseLogin(c, res, CodeSignUpSuccess)
+		ResponseLogin(c, res, CodeSuccess)
 	}
 
 	//3. 返回登录成功的响应
-	res.User_id = tmpId //此处要改为 tmpUser.Id
+	res.User_id = tmpId
 	res.Token = token
-	ResponseLogin(c, res, CodeSignUpSuccess)
+	ResponseLogin(c, res, CodeSuccess)
 }

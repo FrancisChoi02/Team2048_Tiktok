@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
+	"strconv"
 )
 
 //获取上下文的用户参数
@@ -20,8 +21,8 @@ import (
 func UserInfoHandler(c *gin.Context) {
 
 	//1. 获取参数
-	var p model.ParamUserInfo
 	var res model.UserInfoResponse
+	var p model.ParamUserInfo
 
 	if err := c.ShouldBind(&p); err != nil {
 		// 参数存在空值
@@ -33,13 +34,14 @@ func UserInfoHandler(c *gin.Context) {
 			return
 		}
 		// 参数错误
-		zap.L().Error("SignUp with invalid param", zap.Error(err))
+		zap.L().Error("Invalid param", zap.Error(err))
 		ResponseInfo(c, res, CodeInvalidParam)
 		return
 	}
+	user_id, err := strconv.ParseInt(p.User_id, 10, 64)
 
 	// 2.获取用户
-	tmpUser, err := logic.GetUser(p.User_id)
+	tmpUser, err := logic.GetUser(user_id)
 	if err != nil {
 		// 用户不存在
 		zap.L().Error("logic.GetUserID()")
@@ -50,5 +52,5 @@ func UserInfoHandler(c *gin.Context) {
 
 	// 3.返回响应
 	res.User = tmpUser
-	ResponseInfo(c, res, CodeSignUpSuccess)
+	ResponseInfo(c, res, CodeSuccess)
 }

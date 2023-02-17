@@ -1,5 +1,6 @@
 name: "Team2048_Tiktok"
 mode: "dev"
+ip: 192.168.31.169
 port: 8080
 version: "v0.0.1"
 start_time: "2020-07-01"

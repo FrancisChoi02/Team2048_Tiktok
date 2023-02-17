@@ -14,6 +14,7 @@ var Conf = new(AppConfig)
 type AppConfig struct {
 	Name      string `mapstructure:"name"`
 	Mode      string `mapstructure:"mode"`
+	Ip        string `mapstructure:"ip"` //用于生成对应的视频链接地址
 	Version   string `mapstructure:"version"`
 	StartTime string `mapstructure:"start_time"`
 	MachineID int64  `mapstructure:"machine_id"`
@@ -51,6 +52,8 @@ type LogConfig struct {
 	MaxBackups int    `mapstructure:"max_backups"`
 }
 
+var Info AppConfig
+
 func Init() (err error) {
 
 	//从config.yaml配置文件读取配置，反编译到带tag的结构体中
@@ -66,6 +69,10 @@ func Init() (err error) {
 	// 把读取到的配置信息反序列化到 Conf 变量中
 	if err := viper.Unmarshal(Conf); err != nil {
 		fmt.Printf("viper.Unmarshal failed, err:%v\n", err)
+	}
+
+	if Info.Port != 8080 {
+		fmt.Printf("viper.Unmarshal failed,the Port is wrong, err:%v\n", err)
 	}
 
 	//实时监控配置文件的变化

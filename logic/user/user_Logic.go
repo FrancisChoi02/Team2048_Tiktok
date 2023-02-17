@@ -13,14 +13,9 @@ func SignUp(p *model.ParamSignUp) (int64, error) {
 	user.Name = p.Username
 
 	//1. 查找Username是否已经存在
-	boolstring, err := mysql.GetUser(&user)
+	err := mysql.CheckUserExist(&user)
 	if err != nil { //从数据库中查找到对应的用户
 		zap.L().Error(" mysql.GetUser() failed")
-		return 0, err
-	}
-
-	if boolstring {
-		zap.L().Error("User already exist")
 		return 0, err
 	}
 
@@ -58,7 +53,7 @@ func Login(p *model.ParamSignUp) (tmpId int64, token string, err error) {
 	}
 
 	//3. 颁发JWT
-	token, err = middleware.ReleaseToken(tmpId)
+	token, err = middleware.ReleaseToken(user.Id)
 	if err != nil {
 		zap.L().Error(" middleware.ReleaseToken() failed", zap.Error(err))
 		return

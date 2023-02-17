@@ -48,5 +48,5 @@ func UserSignUpHandler(c *gin.Context) {
 	//3. 返回注册成功的响应
 	res.User_id = tmpId
 	res.Token = token
-	ResponseSignUp(c, res, CodeSignUpSuccess)
+	ResponseSignUp(c, res, CodeSuccess)
 }

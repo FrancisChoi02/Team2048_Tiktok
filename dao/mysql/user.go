@@ -4,6 +4,7 @@ import (
 	"Team2048_Tiktok/model"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 )
@@ -33,16 +34,26 @@ func InsertUser(user *model.User) (err error) {
 	return
 }
 
+// CheckUserExist 查找用户是否村子
+func CheckUserExist(user *model.User) (err error) {
+	if err := DB.Where("name = ?", user.Name).First(user).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil
+		}
+	}
+	return ErrorUserExist
+}
+
 // GetUser 获取完整的用户信息,查询用户是否存在
 func GetUser(user *model.User) (boolstring bool, err error) {
 	boolstring = false
-	if err := DB.Where("name = ?", user.Name).First(user).Error; err != nil {
+	if err := DB.Where("id = ?", user.Id).First(&user).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			// 处理记录不存在错误
 			zap.L().Error("User doesn't exist", zap.Error(err))
 		} else {
 			// 处理其他错误
-			zap.L().Error("DB.Where(\"name = ?\", username).First(user) failed", zap.Error(err))
+			zap.L().Error("DB.Where(\"id = ?\", user.Id).First(user) failed", zap.Error(err))
 		}
 		return boolstring, ErrorUserNotExist
 	}
@@ -55,22 +66,27 @@ func GetUser(user *model.User) (boolstring bool, err error) {
 func Login(user *model.User) (err error) {
 	// 1.临时结构体保存数据库查询结果
 	var tmpUser model.User
-	tmpUser.Name = user.Name
-	if err := DB.Where("name = ?", tmpUser.Name).First(user).Error; err != nil {
+
+	if err := DB.Where("name = ?", user.Name).First(&tmpUser).Error; err != nil {
+		fmt.Println("Checking Point 2")
 		if gorm.IsRecordNotFoundError(err) {
 			// 处理记录不存在错误
 			zap.L().Error("User doesn't exist", zap.Error(err))
 		} else {
 			// 处理其他错误
-			zap.L().Error("DB.Where(\"name = ?\", username).First(user) failed", zap.Error(err))
+			return ErrorInserFaied
 		}
 		return ErrorUserNotExist
 	}
 
 	// 2.将数据库中的密码密文进行比对
 	user.Password = encryptPassword(user.Password)
+
 	if tmpUser.Password != user.Password {
 		return ErrorInvalidPassword
 	}
+	//返回登录成功的用户ID
+	user.Id = tmpUser.Id
+
 	return err
 }

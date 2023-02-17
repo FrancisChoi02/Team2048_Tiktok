@@ -8,6 +8,6 @@ type ParamSignUp struct {
 
 // ParamUserInfo 用户信息请求参数
 type ParamUserInfo struct {
-	User_id int64  `json:"user_id"`
-	Token   string `json:"token"`
+	User_id string `form:"user_id"binding:"required"`
+	Token   string `form:"token"binding:"required"`
 }

@@ -3,6 +3,7 @@ package router
 import (
 	_ "Team2048_Tiktok/docs" // 上一步swagger init 生成的docs也要导入
 	"Team2048_Tiktok/handler/user"
+	"Team2048_Tiktok/handler/video"
 	"Team2048_Tiktok/logger"
 	"Team2048_Tiktok/middleware"
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,7 @@ func SetupRouter(mode string) *gin.Engine {
 	//使用自定义中间件
 	r.Use(logger.GinLogger(), logger.GinRecovery(true))
 
-	//基础接口
+	//用户接口
 	userAPI := r.Group("/douyin/user")
 	{
 		userAPI.GET("/", middleware.JWTMiddleware(), user.UserInfoHandler)
@@ -27,11 +28,14 @@ func SetupRouter(mode string) *gin.Engine {
 		userAPI.POST("/register/", user.UserSignUpHandler)
 	}
 
-	//videoAPI := r.Group("/douyin/publish")
+	//视频接口
+	//r.GET("/douyin/feed/", video.FeedVideoListHandler)
+	videoAPI := r.Group("/douyin")
+	videoAPI.Use(middleware.JWTMiddleware())
 	{
-		//r.GET("/douyin/feed/", video.FeedVideoListHandler)
+		videoAPI.POST("/action/", middleware.JWTMiddleware(), video.VideoPublishHandler)
+		//videoAPI.GET("/feed/", video.FeedVideoListHandler)
 		//videoAPI.GET("/list/", middleware.NoAuthToGetUserId(), video.QueryVideoListHandler)
-		//videoAPI.POST("/action/", middleware.JWTMiddleware(), video.PublishVideoHandler)
 	}
 
 	//swagger接口文档所需要的路由（暂未实现）
