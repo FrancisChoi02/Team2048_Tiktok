@@ -8,6 +8,7 @@ const (
 	CodeServerBusy
 	CodeUserIdError
 	CodeVideoError
+	CodeVideoListError
 )
 
 const (
@@ -16,11 +17,12 @@ const (
 
 //使用哈希表装载 状态码 对应的提示语句
 var codeMsgMap = map[StatusCode]string{
-	CodeSuccess:       "响应成功",
-	CodePublishFailed: "视频发布失败",
-	CodeServerBusy:    "服务器繁忙",
-	CodeUserIdError:   "用户ID解析错误",
-	CodeVideoError:    "视频错误",
+	CodeSuccess:        "响应成功",
+	CodePublishFailed:  "视频发布失败",
+	CodeServerBusy:     "服务器繁忙",
+	CodeUserIdError:    "用户ID解析错误",
+	CodeVideoError:     "视频错误",
+	CodeVideoListError: "用户视频列表获取失败",
 }
 
 func (c StatusCode) Msg() string {

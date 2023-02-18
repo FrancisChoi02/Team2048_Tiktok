@@ -47,7 +47,7 @@ func CheckUserExist(user *model.User) (err error) {
 // GetUser 获取完整的用户信息,查询用户是否存在
 func GetUser(user *model.User) (boolstring bool, err error) {
 	boolstring = false
-	if err := DB.Where("id = ?", user.Id).First(&user).Error; err != nil {
+	if err := DB.Where("id = ?", user.Id).First(user).Error; err != nil { //这里曾经是&user
 		if gorm.IsRecordNotFoundError(err) {
 			// 处理记录不存在错误
 			zap.L().Error("User doesn't exist", zap.Error(err))

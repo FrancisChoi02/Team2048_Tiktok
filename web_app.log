@@ -182,3 +182,10 @@
 {"level":"INFO","time":"2023-02-17T22:47:35.419+0800","caller":"logger/logger.go:85","msg":"/douyin/action/","status":200,"method":"POST","path":"/douyin/action/","query":"","ip":"127.0.0.1","user-agent":"PostmanRuntime/7.29.2","errors":"","cost":0.2459525}
 {"level":"INFO","time":"2023-02-17T22:48:07.959+0800","caller":"logger/logger.go:49","msg":"init logger success"}
 {"level":"INFO","time":"2023-02-17T22:48:19.820+0800","caller":"logger/logger.go:85","msg":"/douyin/action/","status":200,"method":"POST","path":"/douyin/action/","query":"","ip":"127.0.0.1","user-agent":"PostmanRuntime/7.29.2","errors":"","cost":0.2420117}
+{"level":"INFO","time":"2023-02-17T23:47:40.910+0800","caller":"logger/logger.go:49","msg":"init logger success"}
+{"level":"ERROR","time":"2023-02-17T23:48:26.150+0800","caller":"middleware/authority_Verify.go:25","msg":"User didn't login"}
+{"level":"INFO","time":"2023-02-17T23:48:26.151+0800","caller":"logger/logger.go:85","msg":"/douyin/action/","status":200,"method":"POST","path":"/douyin/action/","query":"","ip":"127.0.0.1","user-agent":"PostmanRuntime/7.29.2","errors":"","cost":0.0080569}
+{"level":"INFO","time":"2023-02-17T23:48:43.993+0800","caller":"logger/logger.go:85","msg":"/douyin/user/login/","status":200,"method":"POST","path":"/douyin/user/login/","query":"","ip":"127.0.0.1","user-agent":"PostmanRuntime/7.29.2","errors":"","cost":0.010552}
+{"level":"ERROR","time":"2023-02-17T23:49:10.998+0800","caller":"middleware/authority_Verify.go:25","msg":"User didn't login"}
+{"level":"INFO","time":"2023-02-17T23:49:10.998+0800","caller":"logger/logger.go:85","msg":"/douyin/action/","status":200,"method":"POST","path":"/douyin/action/","query":"","ip":"127.0.0.1","user-agent":"PostmanRuntime/7.29.2","errors":"","cost":0.0060339}
+{"level":"INFO","time":"2023-02-17T23:51:53.620+0800","caller":"logger/logger.go:85","msg":"/douyin/action/","status":200,"method":"POST","path":"/douyin/action/","query":"","ip":"127.0.0.1","user-agent":"PostmanRuntime/7.29.2","errors":"","cost":0.9696137}

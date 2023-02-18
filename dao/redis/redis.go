@@ -25,9 +25,11 @@ func Init(cfg *conf.RedisConfig) (err error) {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
+//	Close 关闭Redis数据库
 func Close() {
 	_ = client.Close()
 }

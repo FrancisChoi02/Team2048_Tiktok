@@ -23,3 +23,9 @@ type VideoUploadResponse struct {
 	Code int32  // 状态码，0-成功，其他值-失败
 	Msg  string // 返回状态描述
 }
+
+type VideoListResponse struct {
+	Code      int32  // 状态码，0-成功，其他值-失败
+	Msg       string // 返回状态描述
+	VideoList *[]VideoResponse
+}

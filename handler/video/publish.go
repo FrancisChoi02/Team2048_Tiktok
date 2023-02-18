@@ -17,8 +17,6 @@ func VideoPublishHandler(c *gin.Context) {
 		return
 	}
 
-	title := c.PostForm("title")
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		ResponsePublish(c, CodeVideoError)
@@ -26,7 +24,7 @@ func VideoPublishHandler(c *gin.Context) {
 	}
 
 	// 2. 保存视频以及视频信息,如有错误返回响应
-	err = logic.VideoPublish(c, userId, title, form)
+	err = logic.VideoPublish(c, userId, form)
 	if err != nil {
 		zap.L().Error("logic.VideoPublish() failed", zap.Error(err))
 		ResponsePublish(c, CodePublishFailed)
