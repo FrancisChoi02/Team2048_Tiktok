@@ -14,7 +14,7 @@ import (
 func JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		//需要修改获取方式
+		//从上下文中获取token
 		tokenStr := c.Query("token")
 		if tokenStr == "" {
 			tokenStr = c.PostForm("token")

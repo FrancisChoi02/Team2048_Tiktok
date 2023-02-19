@@ -34,12 +34,26 @@ func PostVideo(videoId, userId int64, filePath, coverPath, title string) (err er
 	return err
 }
 
-// GetVideoList 获取用户Id对应的投稿视频列表
+// GetVideoList 获取用户Id对应的投稿视频列表(视频基础信息)
 func GetVideoList(userId int64) (*[]model.Video, error) {
 	videoList := new([]model.Video)
 
 	//设定15条视频为上限
 	err := DB.Where("user_id=?", userId).
+		Select([]string{"id", "user_id", "play_url", "cover_url", "title", "create_time"}).
+		Limit(15).
+		Find(videoList).Error
+
+	return videoList, err
+}
+
+// GetFeedList 获取视频流列表（视频基础信息）
+func GetFeedList(latestTime int64) (*[]model.Video, error) {
+	videoList := new([]model.Video)
+
+	//按照视频投稿时间的 倒序，latestTime之后的15个视频
+	err := DB.Where("created_at<?", latestTime).
+		Order("created_at ASC").
 		Select([]string{"id", "user_id", "play_url", "cover_url", "title", "create_time"}).
 		Limit(15).
 		Find(videoList).Error

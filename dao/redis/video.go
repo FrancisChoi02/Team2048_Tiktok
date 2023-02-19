@@ -8,6 +8,15 @@ import (
 	"strconv"
 )
 
+// assembleVideoListFull  组装videoListFull单元
+func assembleVideoListFull(video *model.Video, index int, videoListFull []model.VideoResponse) {
+	videoListFull[index].Id = video.Id
+	videoListFull[index].PlayUrl = video.PlayUrl
+	videoListFull[index].CoverUrl = video.CoverUrl
+	videoListFull[index].Title = video.Title
+	videoListFull[index].CreatedAt = video.CreatedAt
+}
+
 //GetVideoListDetail 返回用户投稿视频列表的完整数据
 func GetVideoListDetail(videoList *[]model.Video) (*[]model.VideoResponse, error) {
 	// 1.判断视频列表是否为空
@@ -50,12 +59,89 @@ func GetVideoListDetail(videoList *[]model.Video) (*[]model.VideoResponse, error
 		}
 
 		// d.组装videoListFull单元
-		videoListFull[i].Id = video.Id
 		videoListFull[i].Author = *tmpUser
-		videoListFull[i].PlayUrl = video.PlayUrl
-		videoListFull[i].CoverUrl = video.CoverUrl
-		videoListFull[i].Title = video.Title
-		videoListFull[i].CreatedAt = video.CreatedAt
+		assembleVideoListFull(&video, i, videoListFull)
 	}
 	return &videoListFull, nil
+}
+
+// GetFeedListWithNoToken  获取未登录用户的视频流
+func GetFeedListWithNoToken(feedList *[]model.Video) (*[]model.VideoResponse, error) {
+	// 1.判断视频列表是否为空
+	if feedList == nil {
+		err := errors.New("videoList has nothing")
+		zap.L().Error("videoList has nothing")
+		return nil, err
+	}
+
+	// 2.构建VideoResponse数组
+	size := len(*feedList)
+	feedListFull := make([]model.VideoResponse, size)
+
+	//	3.每个视频单独处理
+	for i, video := range *feedList {
+		tmpVideoID := strconv.Itoa(int(video.Id))
+
+		// a.获取视频的点赞数
+		feedListFull[i].FavoriteCount = int64(client.ZScore(model.GetRedisKey(model.KeyVideoScoreZset), tmpVideoID).Val())
+
+		// b.获取视频的评论数
+		feedListFull[i].CommentCount = int64(client.ZScore(model.GetRedisKey(model.KeyVideoCommentNumZset), tmpVideoID).Val())
+
+		// c.用户没登录，默认视频没有点赞
+		feedListFull[i].IsFavorite = false
+
+		// d.组装videoListFull单元
+		assembleVideoListFull(&video, i, feedListFull)
+	}
+	return &feedListFull, nil
+
+}
+
+// GetFeedListWithToken  获取登录用户的视频流
+func GetFeedListWithToken(userId int64, feedList *[]model.Video) (*[]model.VideoResponse, error) {
+	// 1.判断视频列表是否为空
+	if feedList == nil {
+		err := errors.New("videoList has nothing")
+		zap.L().Error("videoList has nothing")
+		return nil, err
+	}
+
+	// 2.构建VideoResponse数组
+	size := len(*feedList)
+	feedListFull := make([]model.VideoResponse, size)
+
+	//	3.每个视频单独处理
+	for i, video := range *feedList {
+		tmpVideoID := strconv.Itoa(int(video.Id))
+
+		// a.获取视频的点赞数
+		feedListFull[i].FavoriteCount = int64(client.ZScore(model.GetRedisKey(model.KeyVideoScoreZset), tmpVideoID).Val())
+
+		// b.获取视频的评论数
+		feedListFull[i].CommentCount = int64(client.ZScore(model.GetRedisKey(model.KeyVideoCommentNumZset), tmpVideoID).Val())
+
+		// c.查看登录的用户有没有点赞当前视频
+		tmpUser := &model.User{}
+		tmpUser.Id = userId
+
+		_, err := mysql.GetUser(tmpUser)
+		if err != nil {
+			zap.L().Error(" GetUser() failed", zap.Error(err))
+		}
+
+		//查看当前用户 给 当前视频 的赞记录
+		tmpUserID := strconv.Itoa(int(tmpUser.Id))
+		ok := client.ZScore(model.GetRedisKey(model.KeyVideoLikedZSetPrefix+tmpVideoID), tmpUserID).Val()
+		if ok == 1 {
+			feedListFull[i].IsFavorite = true
+		} else {
+			feedListFull[i].IsFavorite = false
+		}
+
+		// d.组装videoListFull单元
+		feedListFull[i].Author = *tmpUser
+		assembleVideoListFull(&video, i, feedListFull)
+	}
+	return &feedListFull, nil
 }

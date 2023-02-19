@@ -29,12 +29,12 @@ func SetupRouter(mode string) *gin.Engine {
 	}
 
 	//视频接口
-	//r.GET("/douyin/feed/", video.FeedVideoListHandler)
+	r.GET("/douyin/feed/", video.FeedVideoListHandler)
 	videoAPI := r.Group("/douyin")
 	videoAPI.Use(middleware.JWTMiddleware())
 	{
 		videoAPI.POST("/action/", video.VideoPublishHandler)
-		videoAPI.GET("/list/", video.QueryVideoListHandler)
+		videoAPI.GET("/list/", video.VideoListHandler)
 	}
 
 	//swagger接口文档所需要的路由

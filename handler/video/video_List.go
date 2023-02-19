@@ -11,6 +11,7 @@ func VideoListHandler(c *gin.Context) {
 	rawId, _ := c.Get("user_id")
 	userId, ok := rawId.(int64)
 	if !ok {
+		zap.L().Error("user_id invalid")
 		ResponseVideoListError(c, CodeUserIdError)
 		return
 	}

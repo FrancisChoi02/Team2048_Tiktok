@@ -138,3 +138,40 @@ func GetVideoListByUserId(userId int64) (*[]model.VideoResponse, error) {
 
 	return videoListFinal, err
 }
+
+func FeedWithNoToken(latestTime int64) (*[]model.VideoResponse, error) {
+
+	// 1.获取视频流的基础信息
+	feedList, err := mysql.GetFeedList(latestTime)
+	if err != nil {
+		zap.L().Error("mysql.GetFeedList() failed", zap.Error(err))
+		return nil, err //返回空切片
+	}
+
+	// 2. 获取视频的详细信息
+	videoListFinal, err := redis.GetFeedListWithNoToken(feedList)
+	if err != nil {
+		zap.L().Error("redis.GetFeedListWithNoToken() failed", zap.Error(err))
+		return nil, err //返回空切片
+	}
+
+	return videoListFinal, nil
+}
+
+func FeedWithToken(latestTime, userId int64) (*[]model.VideoResponse, error) {
+	// 1.获取视频流的基础信息
+	feedList, err := mysql.GetFeedList(latestTime)
+	if err != nil {
+		zap.L().Error("mysql.GetFeedList() failed", zap.Error(err))
+		return nil, err //返回空切片
+	}
+
+	// 2. 获取用户与视频的点赞关系、视频的详细信息
+	videoListFinal, err := redis.GetFeedListWithToken(userId, feedList)
+	if err != nil {
+		zap.L().Error("redis.GetFeedListWithNoToken() failed", zap.Error(err))
+		return nil, err //返回空切片
+	}
+
+	return videoListFinal, nil
+}
