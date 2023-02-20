@@ -17,7 +17,43 @@ func assembleVideoListFull(video *model.Video, index int, videoListFull []model.
 	videoListFull[index].CreatedAt = video.CreatedAt
 }
 
-//GetVideoListDetail 返回用户投稿视频列表的完整数据
+// assembleVideoFull  组装视频
+func assembleVideoFull(video *model.Video, videoFull *model.VideoResponse) {
+	videoFull.Id = video.Id
+	videoFull.PlayUrl = video.PlayUrl
+	videoFull.CoverUrl = video.CoverUrl
+	videoFull.Title = video.Title
+	videoFull.CreatedAt = video.CreatedAt
+}
+
+// GetVideoDetail 返回视频的完整数据
+func GetVideoDetail(tmpVideo *model.Video) (*model.VideoResponse, error) {
+	tmpVideoID := strconv.Itoa(int(tmpVideo.Id))
+	videoFull := new(model.VideoResponse)
+	// a.获取视频的点赞数
+	videoFull.FavoriteCount = int64(client.ZScore(model.GetRedisKey(model.KeyVideoScoreZset), tmpVideoID).Val())
+
+	// b.获取视频的评论数
+	videoFull.CommentCount = int64(client.ZScore(model.GetRedisKey(model.KeyVideoCommentNumZset), tmpVideoID).Val())
+
+	// c.点赞设置为有
+	videoFull.IsFavorite = true
+	tmpUser := &model.User{}
+	tmpUser.Id = tmpVideo.UserId
+
+	_, err := mysql.GetUser(tmpUser)
+	if err != nil {
+		zap.L().Error(" GetUser() failed", zap.Error(err))
+	}
+
+	// d.组装videoListFull单元
+	videoFull.Author = *tmpUser
+	assembleVideoFull(tmpVideo, videoFull)
+
+	return videoFull, nil
+}
+
+// GetVideoListDetail 返回用户投稿视频列表的完整数据
 func GetVideoListDetail(videoList *[]model.Video) (*[]model.VideoResponse, error) {
 	// 1.判断视频列表是否为空
 	if videoList == nil {

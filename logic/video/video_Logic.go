@@ -26,6 +26,20 @@ var (
 	}
 )
 
+// GetVideo 获取视频，判断对应Id是视频是否存在
+func GetVideoById(videoId int64) (model.Video, error) {
+	// 构建视频实例
+	video := model.Video{}
+	video.Id = videoId
+
+	_, err := mysql.GetVideo(&video)
+	if err != nil {
+		zap.L().Error("mysql.GetVideo() failed", zap.Error(err))
+		return video, err
+	}
+	return video, nil
+}
+
 // VideoPublish 用户视频投稿，将视频数据保存的在服务端本地
 func VideoPublish(c *gin.Context, userId int64, form *multipart.Form) (err error) {
 	videoData := form.File["data"]

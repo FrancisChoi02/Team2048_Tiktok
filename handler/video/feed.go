@@ -26,40 +26,53 @@ func FeedVideoListHandler(c *gin.Context) {
 	// 2.区分有无token两种情况（有token的，加载点赞情况）
 	if tokenStr == "" {
 		//使用没有登录的feed
+		//返回没有登录的Msg提醒
+		videoListFull, err := logic.FeedWithNoToken(latestTime)
+		if err != nil {
+			ResponseVideoListError(c, CodeVideoListError)
+			return
+		}
+		//返回正常响应
+		ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
 	} else {
 		//验证token合法性
 		claims, err := middleware.ParseToken(tokenStr)
 		if err != nil {
 			//使用没有登录的feed
 			//返回没有登录的Msg提醒
-			err := logic.FeedWithNoToken(latestTime)
+			videoListFull, err := logic.FeedWithNoToken(latestTime)
 			if err != nil {
-
 				ResponseVideoListError(c, CodeVideoListError)
 				return
 			}
+			//返回正常响应
+			ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
 		}
 
 		//检查token是否过期
 		if time.Now().Unix() > claims.ExpiresAt {
 			//使用没有登录的feed
 			//返回没有登录的Msg题型
-			err := logic.FeedWithNoToken(latestTime)
+			videoListFull, err := logic.FeedWithNoToken(latestTime)
 			if err != nil {
 				zap.L().Error("logic.FeedWithNoToken() failed", zap.Error(err))
 				ResponseVideoListError(c, CodeVideoListError)
 				return
 			}
+			//返回正常响应
+			ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
 		}
 
 		//使用登录后的feed，获取user_id
 		tmpId := claims.UserId
-		err = logic.FeedWithToken(latestTime, tmpId)
+		videoListFull, err := logic.FeedWithToken(latestTime, tmpId)
 		if err != nil {
 			zap.L().Error("logic.FeedWithToken() failed", zap.Error(err))
 			ResponseVideoListError(c, CodeVideoListError)
 			return
 		}
+		//返回正常响应
+		ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
 	}
 
 }

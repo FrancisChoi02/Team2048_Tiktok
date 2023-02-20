@@ -33,3 +33,11 @@ func ResponseVideoListSuccess(c *gin.Context, code StatusCode, videoList *[]mode
 	res.VideoList = videoList
 	c.JSON(http.StatusOK, res)
 }
+
+// ResponseAtcion 返回点赞操作的情况
+func ResponseAtcion(c *gin.Context, code StatusCode) {
+	var res model.FavorateActionResponse
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	c.JSON(http.StatusOK, res)
+}

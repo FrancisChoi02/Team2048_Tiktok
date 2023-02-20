@@ -9,7 +9,7 @@ const (
 	KeyVideoScoreZset       = "video:score"       //视频 以及 累积的点赞数量
 	KeyVideoCommentNumZset  = "video:commentNum:" //视频 以及 累积的评论数量
 	KeyVideoLikedZSetPrefix = "video:liked:"      //这是 键 的前缀，搭配 视频ID 成为一个完成的键；值是对该视频按了用户ID 与 点赞状态
-	KeyUserFavorSetPrefix   = "user:favorite:"    //这是 键 的前缀，搭配 用户ID 成为一个完整的键；值是该用户点过赞的视频ID
+	KeyUserFavorZsetPrefix  = "user:favorite:"    //这是 键 的前缀，搭配 用户ID 成为一个完整的键；值是该用户点过赞的视频ID 与 操作时间戳
 	//视频评论，以视频id为键，保存所有的评论id，评论本身存在Mysql中
 
 	//社交接口

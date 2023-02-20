@@ -9,6 +9,7 @@ const (
 	CodeUserIdError
 	CodeVideoError
 	CodeVideoListError
+	CodeActionError
 )
 
 const (
@@ -23,6 +24,7 @@ var codeMsgMap = map[StatusCode]string{
 	CodeUserIdError:    "用户ID解析错误",
 	CodeVideoError:     "视频错误",
 	CodeVideoListError: "用户视频列表获取失败",
+	CodeActionError:    "点赞操作失败",
 }
 
 func (c StatusCode) Msg() string {

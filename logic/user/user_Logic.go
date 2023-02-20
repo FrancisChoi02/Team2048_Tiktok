@@ -66,7 +66,7 @@ func Login(p *model.ParamSignUp) (tmpId int64, token string, err error) {
 
 // GetUser 通过Id获得对应的User结构体
 func GetUser(id int64) (model.User, error) {
-	//2. 构建用户实例
+	// 构建用户实例
 	user := model.User{
 		Id:            id,
 		Name:          "",

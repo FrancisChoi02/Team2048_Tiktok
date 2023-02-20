@@ -10,6 +10,7 @@ import (
 func VideoPublishHandler(c *gin.Context) {
 
 	// 1. 获取请求中的参数和视频数据
+	// 获取上下文中保存的user_id
 	rawId, _ := c.Get("user_id")
 	userId, ok := rawId.(int64)
 	if !ok {

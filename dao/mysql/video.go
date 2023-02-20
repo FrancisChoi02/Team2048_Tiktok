@@ -3,6 +3,7 @@ package mysql
 import (
 	"Team2048_Tiktok/model"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 	"time"
 )
@@ -59,4 +60,22 @@ func GetFeedList(latestTime int64) (*[]model.Video, error) {
 		Find(videoList).Error
 
 	return videoList, err
+}
+
+// GetVideo 获取视频信息，并查询视频是否存在
+func GetVideo(video *model.Video) (boolstring bool, err error) {
+	boolstring = false
+	if err := DB.Where("id = ?", video.Id).First(video).Error; err != nil { //这里曾经是&user
+		if gorm.IsRecordNotFoundError(err) {
+			// 处理记录不存在错误
+			zap.L().Error("Video doesn't exist", zap.Error(err))
+		} else {
+			// 处理其他错误
+			zap.L().Error("DB.Where(\"id = ?\", video.Id).First(video) failed", zap.Error(err))
+		}
+		return boolstring, ErrorVideoNotExist
+	}
+
+	boolstring = true
+	return boolstring, err
 }
