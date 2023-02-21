@@ -37,14 +37,21 @@ func SetupRouter(mode string) *gin.Engine {
 		videoAPI.GET("/list/", video.VideoListHandler)
 	}
 
+	//互动接口
 	interactAPI := r.Group("/douyin/favorite")
 	interactAPI.Use(middleware.JWTMiddleware())
 	{
 		interactAPI.POST("/action/", video.FavorateActionHandler)
 		interactAPI.GET("/list/", video.FavorateListHandler)
 	}
+	commentAPI := r.Group("/douyin/comment")
+	commentAPI.Use(middleware.JWTMiddleware())
+	{
+		commentAPI.POST("/action/", video.CommentActionHandler)
+		commentAPI.GET("/list/ ", video.CommentListHandler)
+	}
 
-	//互动接口
+	//社交接口
 
 	//swagger接口文档所需要的路由
 	r.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))

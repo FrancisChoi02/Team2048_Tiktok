@@ -20,6 +20,7 @@ func VideoListHandler(c *gin.Context) {
 	if err != nil {
 		zap.L().Error("logic.GetVideoListByUserId() failed", zap.Error(err))
 		ResponseVideoListError(c, CodeVideoListError)
+		return
 	}
 
 	ResponseVideoListSuccess(c, CodeSuccess, videoList)

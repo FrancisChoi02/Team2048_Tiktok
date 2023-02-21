@@ -22,12 +22,14 @@ func FavorateActionHandler(c *gin.Context) {
 	if err != nil {
 		zap.L().Error("videoId invalid", zap.Error(err))
 		ResponseVideoListError(c, CodeActionError)
+		return
 	}
 
 	actionType, err := strconv.Atoi(c.PostForm("action_type"))
 	if err != nil {
 		zap.L().Error("ActionType invalid", zap.Error(err))
 		ResponseVideoListError(c, CodeActionError)
+		return
 	}
 
 	// 2.处理点赞逻辑
@@ -36,6 +38,7 @@ func FavorateActionHandler(c *gin.Context) {
 	if err := logic.TakeAction(userId, tmpVideo, tmpAction); err != nil {
 		zap.L().Error("ActionType invalid", zap.Error(err))
 		ResponseVideoListError(c, CodeActionError)
+		return
 	}
 
 	// 3.返回成功点赞操作的响应
@@ -57,6 +60,7 @@ func FavorateListHandler(c *gin.Context) {
 	if err != nil {
 		zap.L().Error("logic.GetFavorListByUserId()", zap.Error(err))
 		ResponseVideoListError(c, CodeVideoListError)
+		return
 	}
 
 	ResponseVideoListSuccess(c, CodeSuccess, favorList)

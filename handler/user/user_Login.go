@@ -33,7 +33,8 @@ func UserLoginHandler(c *gin.Context) {
 	tmpId, token, err := logic.Login(&p) //这里应该是tmpUser.Id
 	if err != nil {
 		zap.L().Error("logic.Login() failed", zap.Error(err))
-		ResponseLogin(c, res, CodeSuccess)
+		ResponseLogin(c, res, CodeUserNotLogin)
+		return
 	}
 
 	//3. 返回登录成功的响应

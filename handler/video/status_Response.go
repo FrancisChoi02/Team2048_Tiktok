@@ -41,3 +41,43 @@ func ResponseAtcion(c *gin.Context, code StatusCode) {
 	res.Msg = code.Msg()
 	c.JSON(http.StatusOK, res)
 }
+
+// ResponseComment 返回成功评论的结果
+func ResponseCommentSuccess(c *gin.Context, code StatusCode, comment model.CommentResponse) {
+	var res model.CommentActionResponse
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	res.Comment = comment
+	c.JSON(http.StatusOK, res)
+}
+
+// ResponseCommentErr 返回评论失败的结果
+func ResponseCommentError(c *gin.Context, code StatusCode) {
+	var res model.CommentActionResponse
+	var tmpComment model.CommentResponse
+
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	res.Comment = tmpComment //返回一个空的评论
+	c.JSON(http.StatusOK, res)
+}
+
+// ResponseCommentListError 返回评论失败的结果
+func ResponseCommentListError(c *gin.Context, code StatusCode) {
+	var res model.CommentListResponse
+	var tmpComment *[]model.CommentResponse
+
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	res.CommentList = tmpComment //返回一个空的评论数组
+	c.JSON(http.StatusOK, res)
+}
+
+// ResponseCommentListSuccess 返回评论失败的结果
+func ResponseCommentListSuccess(c *gin.Context, code StatusCode, commentList *[]model.CommentResponse) {
+	var res model.CommentListResponse
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	res.CommentList = commentList //返回一个空的评论数组
+	c.JSON(http.StatusOK, res)
+}

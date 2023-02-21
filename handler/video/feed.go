@@ -47,6 +47,7 @@ func FeedVideoListHandler(c *gin.Context) {
 			}
 			//返回正常响应
 			ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
+			return
 		}
 
 		//检查token是否过期
@@ -61,6 +62,7 @@ func FeedVideoListHandler(c *gin.Context) {
 			}
 			//返回正常响应
 			ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
+			return
 		}
 
 		//使用登录后的feed，获取user_id

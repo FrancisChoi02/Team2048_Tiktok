@@ -34,3 +34,15 @@ type FavorateActionResponse struct {
 	Code int32  // 状态码，0-成功，其他值-失败
 	Msg  string // 返回状态描述
 }
+
+type CommentActionResponse struct {
+	Code    int32           // 状态码，0-成功，其他值-失败
+	Msg     string          // 返回状态描述
+	Comment CommentResponse //返回评论结果
+}
+
+type CommentListResponse struct {
+	Code        int32              // 状态码，0-成功，其他值-失败
+	Msg         string             // 返回状态描述
+	CommentList *[]CommentResponse //返回评论列表
+}
