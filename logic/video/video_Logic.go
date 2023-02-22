@@ -106,7 +106,13 @@ func VideoPublish(c *gin.Context, userId int64, form *multipart.Form) (err error
 			return err
 		}
 
-		//  6.独立返回每个视频上传成功的响应
+		//  6.增加用户的视频发布数
+		if err = redis.RecordPublishNum(userId); err != nil {
+			zap.L().Error(" redis.RecordPublishNum() failed", zap.Error(err))
+
+		}
+
+		//  7.独立返回每个视频上传成功的响应
 		var res model.VideoUploadResponse
 		res.Code = 0
 		res.Msg = file.Filename + "上传成功"

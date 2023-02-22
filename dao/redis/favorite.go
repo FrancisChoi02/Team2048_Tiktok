@@ -30,6 +30,8 @@ func FavoritePositive(userId, videoId int64) (err error) {
 
 	pipeline.ZIncrBy(model.GetRedisKey(model.KeyVideoScoreZset), 1, videoStr) //视频的点赞数
 
+	pipeline.ZIncrBy(model.GetRedisKey(model.KeyUserLikedNumZset), 1, userStr) //用户的被点赞数
+
 	_, err = pipeline.Exec()
 	if err != nil {
 		zap.L().Error("Positive pipeline.Exec() failed", zap.Error(err))
@@ -53,6 +55,8 @@ func FavoriteNegative(userId, videoId int64) (err error) {
 	pipeline.ZRem(model.GetRedisKey(model.KeyUserFavorZsetPrefix+userStr), videoStr) ////用户喜爱列表（带时间）
 
 	pipeline.ZIncrBy(model.GetRedisKey(model.KeyVideoScoreZset), -1, videoStr) //视频的点赞数
+
+	pipeline.ZIncrBy(model.GetRedisKey(model.KeyUserLikedNumZset), -1, userStr) //用户的被点赞数
 
 	_, err = pipeline.Exec()
 	if err != nil {

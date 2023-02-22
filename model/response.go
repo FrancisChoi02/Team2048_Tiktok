@@ -14,9 +14,9 @@ type UserDetailResponse struct {
 }
 
 type UserInfoResponse struct {
-	Code int32  // 状态码，0-成功，其他值-失败
-	Msg  string // 返回状态描述
-	User User   // 返回用户结构体
+	Code int32        // 状态码，0-成功，其他值-失败
+	Msg  string       // 返回状态描述
+	User UserResponse // 返回用户信息反馈结构体
 }
 
 type VideoUploadResponse struct {
@@ -45,4 +45,10 @@ type CommentListResponse struct {
 	Code        int32              // 状态码，0-成功，其他值-失败
 	Msg         string             // 返回状态描述
 	CommentList *[]CommentResponse //返回评论列表
+}
+
+type FollowRelationResponse struct {
+	Code     int32   // 状态码，0-成功，其他值-失败
+	Msg      string  // 返回状态描述
+	UserList *[]User //返回评论列表
 }

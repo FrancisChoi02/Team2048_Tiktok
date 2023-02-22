@@ -52,6 +52,15 @@ func SetupRouter(mode string) *gin.Engine {
 	}
 
 	//社交接口
+	relationAPI := r.Group("/douyin/relation")
+	relationAPI.Use(middleware.JWTMiddleware())
+	{
+		relationAPI.POST("/action/", user.RelationshipHandler)
+		relationAPI.GET("/follow/list/", user.FollowRelationHandler)
+		relationAPI.GET("/follower/list/", user.FanRelationHandler)
+		relationAPI.GET("/friend/list", user.FriendRelationHandler)
+	}
+	//消息
 
 	//swagger接口文档所需要的路由
 	r.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))

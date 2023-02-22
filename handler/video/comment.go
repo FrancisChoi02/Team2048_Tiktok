@@ -9,8 +9,8 @@ import (
 
 // CommentActionHandler  用户对视频进行评论
 func CommentActionHandler(c *gin.Context) {
-	// 1. 获取请求中的参数和视频数据
 
+	// 1. 获取请求中的参数和视频数据
 	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
 	userId, ok := rawId.(int64)
 	if !ok {

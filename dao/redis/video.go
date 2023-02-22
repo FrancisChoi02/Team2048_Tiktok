@@ -26,6 +26,13 @@ func assembleVideoFull(video *model.Video, videoFull *model.VideoResponse) {
 	videoFull.CreatedAt = video.CreatedAt
 }
 
+// RecordPublishNum  记录用户的视频投稿数
+func RecordPublishNum(userId int64) error {
+	userStr := strconv.Itoa(int(userId))
+	err := client.ZIncrBy(model.GetRedisKey(model.KeyUserPublisNumZset), 1, userStr).Err() //用户的视频投稿数
+	return err
+}
+
 // GetVideoDetail 返回视频的完整数据
 func GetVideoDetail(tmpVideo *model.Video) (*model.VideoResponse, error) {
 	tmpVideoID := strconv.Itoa(int(tmpVideo.Id))

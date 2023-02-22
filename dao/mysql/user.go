@@ -34,7 +34,7 @@ func InsertUser(user *model.User) (err error) {
 	return
 }
 
-// CheckUserExist 查找用户是否村子
+// CheckUserExist 查找用户是否存在
 func CheckUserExist(user *model.User) (err error) {
 	if err := DB.Where("name = ?", user.Name).First(user).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
@@ -60,6 +60,27 @@ func GetUser(user *model.User) (boolstring bool, err error) {
 
 	boolstring = true
 	return boolstring, err
+}
+
+// GetUserList  根据Id切片，获取用户结构体切片
+func GetUserList(idList []int64) ([]model.User, error) {
+	userList := make([]model.User, len(idList))
+
+	//逐个User进行获取
+	for i, id := range idList {
+		tmpUser := new(model.User)
+		tmpUser.Id = id
+
+		_, err := GetUser(tmpUser)
+		if err != nil {
+			zap.L().Error("GetUser() failed", zap.Error(err))
+			return nil, err
+		}
+
+		userList[i] = *tmpUser
+	}
+
+	return userList, nil
 }
 
 // Login 检查登录用户合法性，获取完整的用户信息

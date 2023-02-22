@@ -2,6 +2,7 @@ package logic
 
 import (
 	"Team2048_Tiktok/dao/mysql"
+	"Team2048_Tiktok/dao/redis"
 	"Team2048_Tiktok/middleware"
 	"Team2048_Tiktok/model"
 	"go.uber.org/zap"
@@ -24,11 +25,9 @@ func SignUp(p *model.ParamSignUp) (int64, error) {
 
 	//3. 构建用户实例
 	user = model.User{
-		Id:            tmpID,
-		Name:          p.Username,
-		Password:      p.Password,
-		FollowCount:   0,
-		FollowerCount: 0,
+		Id:       tmpID,
+		Name:     p.Username,
+		Password: p.Password,
 	}
 
 	//4. 数据保存到MySQL,返回响应
@@ -40,11 +39,9 @@ func Login(p *model.ParamSignUp) (tmpId int64, token string, err error) {
 
 	//1. 构建用户实例
 	user := model.User{
-		Id:            0,
-		Name:          p.Username,
-		Password:      p.Password,
-		FollowCount:   0,
-		FollowerCount: 0,
+		Id:       0,
+		Name:     p.Username,
+		Password: p.Password,
 	}
 	//2. 获取登录后的User结构体 传递的是user指针，因此可以获得user.UserID
 	if err := mysql.Login(&user); err != nil { //从数据库中查找后，user的值会被覆盖一遍
@@ -68,11 +65,9 @@ func Login(p *model.ParamSignUp) (tmpId int64, token string, err error) {
 func GetUser(id int64) (model.User, error) {
 	// 构建用户实例
 	user := model.User{
-		Id:            id,
-		Name:          "",
-		Password:      "",
-		FollowCount:   0,
-		FollowerCount: 0,
+		Id:       id,
+		Name:     "",
+		Password: "",
 	}
 	_, err := mysql.GetUser(&user)
 	if err != nil {
@@ -82,4 +77,34 @@ func GetUser(id int64) (model.User, error) {
 	}
 
 	return user, nil
+}
+
+// GetUserDetail 补充用于返回的用户结构体
+func GetUserDetail(user model.User) (userResponse model.UserResponse, err error) {
+
+	userResponse, err = redis.GetUserDetail(user)
+	if err != nil {
+		zap.L().Error("redis.GetUserDetail() failed", zap.Error(err))
+		return userResponse, err
+	}
+	return userResponse, nil
+}
+
+// CheckIsFollow  查看token用户是否关注当前用户
+func CheckIsFollow(user *model.UserResponse, tokenUserId int64) {
+	//查看自己的信息时，标记为关注
+	if user.Id == tokenUserId {
+		user.IsFollow = true
+		return
+	}
+
+	//查看token用户是否关注了user
+	record := redis.GetFollowStatus(tokenUserId, user.Id)
+
+	if record == 1 {
+		user.IsFollow = true
+	} else {
+		user.IsFollow = false
+	}
+
 }
