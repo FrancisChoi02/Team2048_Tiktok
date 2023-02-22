@@ -28,7 +28,7 @@ func AddComment(userId, videoId int64, commentText string) (commentResponse mode
 	}
 
 	// 2.组装comment结构体，存入MySQL中
-	var comment model.Comment
+	comment := new(model.Comment)
 	now := time.Now()
 	dateStr := now.Format("01-02")
 	unixTime := now.Unix()

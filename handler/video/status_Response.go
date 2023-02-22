@@ -14,6 +14,26 @@ func ResponsePublish(c *gin.Context, code StatusCode) {
 	c.JSON(http.StatusOK, res)
 }
 
+// ResponseFeedError 返回视频流错误
+func ResponseFeedError(c *gin.Context, code StatusCode) {
+	var res model.FeedResponse
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	res.VideoList = new([]model.VideoResponse)
+	res.NextTime = 0
+	c.JSON(http.StatusOK, res)
+}
+
+// ResponseFeedSuccess 返回视频流响应
+func ResponseFeedSuccess(c *gin.Context, code StatusCode, videoList *[]model.VideoResponse, nextTime int64) {
+	var res model.FeedResponse
+	res.Code = int32(code)
+	res.Msg = code.Msg()
+	res.VideoList = videoList
+	res.NextTime = nextTime
+	c.JSON(http.StatusOK, res)
+}
+
 // ResponseVideoListError 返回用户视频列表获取错误
 func ResponseVideoListError(c *gin.Context, code StatusCode) {
 	var res model.VideoListResponse

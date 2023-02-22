@@ -27,26 +27,26 @@ func FeedVideoListHandler(c *gin.Context) {
 	if tokenStr == "" {
 		//使用没有登录的feed
 		//返回没有登录的Msg提醒
-		videoListFull, err := logic.FeedWithNoToken(latestTime)
+		videoListFull, nextTime, err := logic.FeedWithNoToken(latestTime)
 		if err != nil {
-			ResponseVideoListError(c, CodeVideoListError)
+			ResponseFeedError(c, CodeVideoListError)
 			return
 		}
 		//返回正常响应
-		ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
+		ResponseFeedSuccess(c, CodeSuccess, videoListFull, nextTime)
 	} else {
 		//验证token合法性
 		claims, err := middleware.ParseToken(tokenStr)
 		if err != nil {
 			//使用没有登录的feed
 			//返回没有登录的Msg提醒
-			videoListFull, err := logic.FeedWithNoToken(latestTime)
+			videoListFull, nextTime, err := logic.FeedWithNoToken(latestTime)
 			if err != nil {
-				ResponseVideoListError(c, CodeVideoListError)
+				ResponseFeedError(c, CodeVideoListError)
 				return
 			}
 			//返回正常响应
-			ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
+			ResponseFeedSuccess(c, CodeSuccess, videoListFull, nextTime)
 			return
 		}
 
@@ -54,27 +54,27 @@ func FeedVideoListHandler(c *gin.Context) {
 		if time.Now().Unix() > claims.ExpiresAt {
 			//使用没有登录的feed
 			//返回没有登录的Msg题型
-			videoListFull, err := logic.FeedWithNoToken(latestTime)
+			videoListFull, nextTime, err := logic.FeedWithNoToken(latestTime)
 			if err != nil {
 				zap.L().Error("logic.FeedWithNoToken() failed", zap.Error(err))
-				ResponseVideoListError(c, CodeVideoListError)
+				ResponseFeedError(c, CodeVideoListError)
 				return
 			}
 			//返回正常响应
-			ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
+			ResponseFeedSuccess(c, CodeSuccess, videoListFull, nextTime)
 			return
 		}
 
 		//使用登录后的feed，获取user_id
 		tmpId := claims.UserId
-		videoListFull, err := logic.FeedWithToken(latestTime, tmpId)
+		videoListFull, nextTime, err := logic.FeedWithToken(latestTime, tmpId)
 		if err != nil {
 			zap.L().Error("logic.FeedWithToken() failed", zap.Error(err))
-			ResponseVideoListError(c, CodeVideoListError)
+			ResponseFeedError(c, CodeVideoListError)
 			return
 		}
 		//返回正常响应
-		ResponseVideoListSuccess(c, CodeSuccess, videoListFull)
+		ResponseFeedSuccess(c, CodeSuccess, videoListFull, nextTime)
 	}
 
 }

@@ -22,9 +22,9 @@ const (
 	KeyUserFollowNumberZset = "relation:follow" //用户 以及 关注的用户的数量
 	KeyUserFanNumberZset    = "relation:fan"    //用户 以及 用户的粉丝的数量
 
-	KeyFriendshipSetPrefix = "user:friend:" //这是 键 的前缀，搭配 用户ID 成为一个完整的键；值是该用户聊天列表中的好友
+	KeyFriendshipSetPrefix = "relation:friend:" //这是 键 的前缀，搭配 用户ID 成为一个完整的键；值是该用户聊天列表中的好友
 	//好友列表，发一条消息就将彼此加入列表
-	//好友消息，以好友id为键，保存双方的  聊天信息id（压根不用在乎彼此，反正聊天记录最终会排序）
+	KeyUserMessageZsetPrefix = "relation:message:" //好友消息，以聊天双方的ID为键，保存信息的id和时间戳
 )
 
 // getRedisKey 为 Redis key 添加前缀

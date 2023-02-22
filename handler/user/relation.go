@@ -28,6 +28,7 @@ func RelationshipHandler(c *gin.Context) {
 	if err != nil {
 		zap.L().Error("ActionType invalid", zap.Error(err))
 		ResponseRelation(c, CodeRelationTypeError)
+		return
 	}
 
 	// 2.处理关注逻辑
@@ -92,16 +93,16 @@ func FriendRelationHandler(c *gin.Context) {
 	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
 	userId, ok := rawId.(int64)
 	if !ok {
-		ResponseRelationListError(c, CodeUserIdError)
+		ResponseFriendListError(c, CodeUserIdError)
 		return
 	}
 	// 2. 获取聊天好友列表
 	friendList, err := logic.GetFriendList(userId)
 	if err != nil {
 		zap.L().Error("logic.GetFriendList()", zap.Error(err))
-		ResponseRelationListError(c, CodeRelationFollowError)
+		ResponseFriendListError(c, CodeRelationFollowError)
 		return
 	}
 	// 3.返回响应
-	ResponseRelationListSuccess(c, CodeSuccess, friendList)
+	ResponseFriendListSuccess(c, CodeSuccess, friendList)
 }

@@ -79,6 +79,62 @@ func Unfollow(userId, toUserId int64) error {
 	return nil
 }
 
+// GetFriendDetail 补全好友列表信息
+func GetFriendDetail(user model.User) (userResponse model.FriendResponse, err error) {
+
+	// 1.获取用户关注数
+	followKey := model.GetRedisKey(model.KeyUserFollowSetPrefix + strconv.FormatInt(user.Id, 10))
+	followCount, err := client.SCard(followKey).Result()
+	if err != nil {
+		zap.L().Error("failed to get follow count from redis", zap.Error(err))
+		return
+	}
+
+	// 2.获取用户粉丝数
+	fansKey := model.GetRedisKey(model.KeyUserFansSetPrefix + strconv.FormatInt(user.Id, 10))
+	fansCount, err := client.SCard(fansKey).Result()
+	if err != nil {
+		zap.L().Error("failed to get fans count from redis", zap.Error(err))
+		return
+	}
+
+	// 3.获取获赞总数
+	likedKey := model.GetRedisKey(model.KeyUserLikedNumZset)
+	likedCount, err := client.ZScore(likedKey, strconv.FormatInt(user.Id, 10)).Result()
+	if err != nil && err != redis.Nil {
+		zap.L().Error("failed to get liked count from redis", zap.Error(err))
+		return
+	}
+
+	// 4.获取发布的视频总数
+	publishedKey := model.GetRedisKey(model.KeyUserPublisNumZset)
+	publishedCount, err := client.ZScore(publishedKey, strconv.FormatInt(user.Id, 10)).Result()
+	if err != nil && err != redis.Nil {
+		zap.L().Error("failed to get published count from redis", zap.Error(err))
+		return
+	}
+
+	// 5.点赞总数
+	favorKey := model.GetRedisKey(model.KeyUserFavorZsetPrefix + strconv.FormatInt(user.Id, 10))
+	favorCount, err := client.ZCard(favorKey).Result()
+	if err != nil {
+		zap.L().Error("failed to get favor count from redis", zap.Error(err))
+		return
+	}
+
+	userResponse = model.FriendResponse{
+		Id:             user.Id,
+		Name:           user.Name,
+		FollowCount:    followCount,
+		FollowerCount:  fansCount,
+		TotalFavorited: int64(likedCount),
+		WorkCount:      int64(publishedCount),
+		FavoriteCount:  favorCount,
+	}
+
+	return userResponse, nil
+}
+
 // GetUserDetail 获取完整的用户信息(关注关系除外）
 func GetUserDetail(user model.User) (userResponse model.UserResponse, err error) {
 
@@ -143,6 +199,7 @@ func GetFollowIdList(userId int64) ([]int64, error) {
 	redisKey := model.GetRedisKey(model.KeyUserFollowSetPrefix + strconv.FormatInt(userId, 10))
 	members, err := client.SMembers(redisKey).Result()
 	if err != nil {
+		zap.L().Error("client.SMembers() failed", zap.Error(err))
 		return nil, err
 	}
 
@@ -151,6 +208,7 @@ func GetFollowIdList(userId int64) ([]int64, error) {
 	for i, member := range members {
 		id, err := strconv.ParseInt(member, 10, 64)
 		if err != nil {
+			zap.L().Error("strconv.ParseInt() failed", zap.Error(err))
 			return nil, err
 		}
 		idList[i] = id
@@ -166,6 +224,7 @@ func GetFollowListDetail(userList []model.User) (*[]model.UserResponse, error) {
 	for _, user := range userList {
 		userResponse, err := GetUserDetail(user)
 		if err != nil {
+			zap.L().Error("GetUserDetail() failed", zap.Error(err))
 			return nil, err
 		}
 		userResponse.IsFollow = true //关注列表的人，全部标记关注状态
@@ -189,6 +248,7 @@ func GetFanIdList(userId int64) ([]int64, error) {
 	for i, member := range members {
 		id, err := strconv.ParseInt(member, 10, 64)
 		if err != nil {
+			zap.L().Error("strconv.ParseInt() failed", zap.Error(err))
 			return nil, err
 		}
 		idList[i] = id
@@ -204,6 +264,7 @@ func GetFanListDetail(userList []model.User, userId int64) (*[]model.UserRespons
 	for _, user := range userList {
 		userResponse, err := GetUserDetail(user)
 		if err != nil {
+			zap.L().Error("GetUserDetail() failed", zap.Error(err))
 			return nil, err
 		}
 		//查看用户是否有回关自己的粉丝
@@ -225,6 +286,7 @@ func GetFriendIdList(userId int64) ([]int64, error) {
 	redisKey := model.GetRedisKey(model.KeyFriendshipSetPrefix + strconv.FormatInt(userId, 10))
 	members, err := client.SMembers(redisKey).Result()
 	if err != nil {
+		zap.L().Error("client.SMembers() failed", zap.Error(err))
 		return nil, err
 	}
 
@@ -233,6 +295,7 @@ func GetFriendIdList(userId int64) ([]int64, error) {
 	for i, member := range members {
 		id, err := strconv.ParseInt(member, 10, 64)
 		if err != nil {
+			zap.L().Error("strconv.ParseInt() failed", zap.Error(err))
 			return nil, err
 		}
 		idList[i] = id
@@ -242,12 +305,13 @@ func GetFriendIdList(userId int64) ([]int64, error) {
 }
 
 // GetFriendListDetail 获得完整的聊天好友列表
-func GetFriendListDetail(userList []model.User, userId int64) (*[]model.UserResponse, error) {
-	var userResponseList []model.UserResponse
+func GetFriendListDetail(userList []model.User, userId int64) (*[]model.FriendResponse, error) {
+	var userResponseList []model.FriendResponse
 
 	for _, user := range userList {
-		userResponse, err := GetUserDetail(user)
+		userResponse, err := GetFriendDetail(user)
 		if err != nil {
+			zap.L().Error("GetFriendDetail() failed", zap.Error(err))
 			return nil, err
 		}
 		//查看用户有无关注聊天列表的好友
@@ -257,6 +321,16 @@ func GetFriendListDetail(userList []model.User, userId int64) (*[]model.UserResp
 		} else {
 			userResponse.IsFollow = false
 		}
+
+		///修改UserResponse类型，补充Message内容
+		tmpMessage, tmpMsgType, err := GetResentMessage(userId, userResponse.Id)
+		if err != nil {
+			zap.L().Error("GetResentMessage() failed", zap.Error(err))
+			return nil, err
+		}
+		userResponse.Message = tmpMessage
+		userResponse.MsgType = tmpMsgType
+
 		userResponseList = append(userResponseList, userResponse)
 	}
 	return &userResponseList, nil

@@ -24,6 +24,13 @@ type VideoUploadResponse struct {
 	Msg  string // 返回状态描述
 }
 
+type FeedResponse struct {
+	Code      int32  // 状态码，0-成功，其他值-失败
+	Msg       string // 返回状态描述
+	NextTime  int64  //下一次视频刷新时间
+	VideoList *[]VideoResponse
+}
+
 type VideoListResponse struct {
 	Code      int32  // 状态码，0-成功，其他值-失败
 	Msg       string // 返回状态描述
@@ -48,7 +55,19 @@ type CommentListResponse struct {
 }
 
 type FollowRelationResponse struct {
-	Code     int32   // 状态码，0-成功，其他值-失败
-	Msg      string  // 返回状态描述
-	UserList *[]User //返回评论列表
+	Code     int32           // 状态码，0-成功，其他值-失败
+	Msg      string          // 返回状态描述
+	UserList *[]UserResponse //返回用户列表
+}
+
+type FriendListResponse struct {
+	Code       int32             // 状态码，0-成功，其他值-失败
+	Msg        string            // 返回状态描述
+	FriendList *[]FriendResponse //返回聊天好友列表
+}
+
+type ChatHistoryResponse struct {
+	Code        int32      // 状态码，0-成功，其他值-失败
+	Msg         string     // 返回状态描述
+	MessageList *[]Message //返回消息列表
 }

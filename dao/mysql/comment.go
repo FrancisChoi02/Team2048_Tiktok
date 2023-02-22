@@ -9,7 +9,7 @@ import (
 )
 
 // PostComment 将comment信息保存到数据库中
-func PostComment(comment model.Comment) error {
+func PostComment(comment *model.Comment) error {
 	// 使用 Create 方法向数据库中插入记录
 	return DB.Create(comment).Error
 }
@@ -79,8 +79,7 @@ func GetCommentResponseList(commentIdList []int64) (*[]model.CommentResponse, er
 
 		commentListFull[i] = *commentResponse
 	}
-	
+
 	return &commentListFull, nil
 
 }
-

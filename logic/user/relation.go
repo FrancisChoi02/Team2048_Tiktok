@@ -175,7 +175,7 @@ func GetFanList(userId int64) (*[]model.UserResponse, error) {
 }
 
 // GetFriendList  获取聊天好友列表
-func GetFriendList(userId int64) (*[]model.UserResponse, error) {
+func GetFriendList(userId int64) (*[]model.FriendResponse, error) {
 	// 1.检验userId是否合法
 	tmpUser := new(model.User)
 	tmpUser.Id = userId
@@ -185,18 +185,21 @@ func GetFriendList(userId int64) (*[]model.UserResponse, error) {
 		return nil, err
 	}
 
+	// 2.获取好友列表Id
 	friendIdList, err := redis.GetFriendIdList(userId)
 	if err != nil {
 		zap.L().Error("redis.GetFollowList() failed", zap.Error(err))
 		return nil, err
 	}
 
+	// 3.获取好友列表基础信息
 	tmpUserList, err := mysql.GetUserList(friendIdList)
 	if err != nil {
 		zap.L().Error("mysql.GetUserList() failed", zap.Error(err))
 		return nil, err
 	}
 
+	// 4.补全好友列表
 	friendList, err := redis.GetFriendListDetail(tmpUserList, userId)
 	if err != nil {
 		zap.L().Error("redis.GetFollowList() failed", zap.Error(err))
