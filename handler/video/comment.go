@@ -17,7 +17,7 @@ import (
 // @Param action_type query int true "操作类型，1 表示添加评论，2 表示删除评论"
 // @Param comment_text query string false "评论内容，当 action_type 为 1 时必填"
 // @Security ApiKeyAuth
-// @Success 200 {object} CommentResponse "操作成功"
+// @Success 200 {object} model.CommentActionResponse "操作成功"
 // @Failure 400 {string} string "用户 ID 错误"
 // @Router /douyin/comment/action/ [post]
 func CommentActionHandler(c *gin.Context) {
@@ -81,7 +81,7 @@ func CommentActionHandler(c *gin.Context) {
 // @Accept application/json
 // @Produce application/json
 // @Param video_id query int true "视频 ID"
-// @Success 200 {object} CommentListResponse "操作成功"
+// @Success 200 {object} model.CommentListResponse "操作成功"
 
 // @Router /douyin/comment/list/ [get]
 func CommentListHandler(c *gin.Context) {

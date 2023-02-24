@@ -1,3 +1,190 @@
+definitions:
+  model.CommentActionResponse:
+    properties:
+      comment:
+        allOf:
+        - $ref: '#/definitions/model.CommentResponse'
+        description: 返回评论结果
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+    type: object
+  model.CommentResponse:
+    properties:
+      content:
+        type: string
+      create_date:
+        type: string
+      id:
+        type: integer
+      user:
+        $ref: '#/definitions/model.UserResponse'
+    type: object
+  model.FeedResponse:
+    properties:
+      next_timet:
+        description: 下一次视频刷新时间
+        type: integer
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+      video_list:
+        items:
+          $ref: '#/definitions/model.VideoResponse'
+        type: array
+    type: object
+  model.FollowRelationResponse:
+    properties:
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+      user_list:
+        description: 返回用户列表
+        items:
+          $ref: '#/definitions/model.UserResponse'
+        type: array
+    type: object
+  model.FriendListResponse:
+    properties:
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+      user_list:
+        description: 返回聊天好友列表
+        items:
+          $ref: '#/definitions/model.FriendResponse'
+        type: array
+    type: object
+  model.FriendResponse:
+    properties:
+      favorite_count:
+        type: integer
+      follow_count:
+        type: integer
+      follower_count:
+        type: integer
+      is_follow:
+        type: boolean
+      message:
+        type: string
+      msgType:
+        description: message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
+        type: integer
+      total_favorited:
+        type: integer
+      user_id:
+        type: integer
+      username:
+        type: string
+      work_count:
+        type: integer
+    type: object
+  model.Message:
+    properties:
+      comment_id:
+        type: integer
+      comment_text:
+        type: string
+      create_time:
+        type: string
+      from_user_id:
+        type: integer
+      to_user_id:
+        type: integer
+    type: object
+  model.UserDetailResponse:
+    properties:
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+      token:
+        description: 用户鉴权token
+        type: string
+      user_id:
+        description: 用户id
+        type: integer
+    type: object
+  model.UserInfoResponse:
+    properties:
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/model.UserResponse'
+        description: 返回用户信息反馈结构体
+    type: object
+  model.UserResponse:
+    properties:
+      favorite_count:
+        type: integer
+      follow_count:
+        type: integer
+      follower_count:
+        type: integer
+      id:
+        type: integer
+      is_follow:
+        type: boolean
+      name:
+        type: string
+      total_favorited:
+        type: integer
+      work_count:
+        type: integer
+    type: object
+  model.VideoListResponse:
+    properties:
+      status_code:
+        description: 状态码，0-成功，其他值-失败
+        type: integer
+      status_msg:
+        description: 返回状态描述
+        type: string
+      video_list:
+        items:
+          $ref: '#/definitions/model.VideoResponse'
+        type: array
+    type: object
+  model.VideoResponse:
+    properties:
+      author:
+        $ref: '#/definitions/model.UserResponse'
+      comment_count:
+        type: integer
+      cover_url:
+        type: string
+      create_time:
+        type: integer
+      favorite_count:
+        type: integer
+      id:
+        type: integer
+      is_favorite:
+        type: boolean
+      play_url:
+        type: string
+      title:
+        type: string
+    type: object
 host: 127.0.0.1:8080
 info:
   contact:
@@ -6,5 +193,432 @@ info:
   description: 极简版抖音
   title: Team2048_Tiktok 项目接口文档
   version: "1.0"
-paths: {}
+paths:
+  /chat/history:
+    get:
+      consumes:
+      - application/json
+      description: 获取聊天记录接口
+      parameters:
+      - description: 接收方用户 ID
+        in: query
+        name: to_user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 消息发送成功
+          schema:
+            $ref: '#/definitions/model.Message'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取聊天记录
+      tags:
+      - 聊天相关接口
+  /douyin/comment/action/:
+    post:
+      consumes:
+      - application/json
+      description: 用户对视频进行评论的接口
+      parameters:
+      - description: 需要评论操作的视频 Id
+        in: query
+        name: video_id
+        required: true
+        type: integer
+      - description: 操作类型，1 表示添加评论，2 表示删除评论
+        in: query
+        name: action_type
+        required: true
+        type: integer
+      - description: 评论内容，当 action_type 为 1 时必填
+        in: query
+        name: comment_text
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/model.CommentActionResponse'
+        "400":
+          description: 用户 ID 错误
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户对视频进行评论
+      tags:
+      - 评论相关接口
+  /douyin/comment/list/:
+    get:
+      responses: {}
+  /douyin/favorite/action/:
+    post:
+      consumes:
+      - application/json
+      description: 用户点赞操作接口
+      parameters:
+      - description: 视频 ID
+        in: query
+        name: video_id
+        required: true
+        type: integer
+      - description: 操作类型，1表示点赞，2表示取消点赞
+        in: query
+        name: action_type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户点赞操作
+      tags:
+      - 视频相关接口
+  /douyin/favorite/list/:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户的喜欢视频列表接口
+      parameters:
+      - description: 用户 ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 用户 ID 错误
+          schema:
+            type: string
+        "500":
+          description: 服务器忙，请稍后重试
+          schema:
+            type: string
+      summary: 获取用户的喜欢视频列表
+      tags:
+      - 视频相关接口
+  /douyin/feed/:
+    get:
+      parameters:
+      - description: 最新时间戳，单位秒
+        in: query
+        name: latest_time
+        required: true
+        type: integer
+      - description: 登录token
+        in: query
+        name: token
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/model.FeedResponse'
+      summary: 获取视频流
+      tags:
+      - Feed
+  /douyin/message/action/:
+    post:
+      consumes:
+      - application/json
+      description: 发送聊天信息接口
+      parameters:
+      - description: 接收方用户 ID
+        in: query
+        name: to_user_id
+        required: true
+        type: integer
+      - description: 消息操作类型
+        in: query
+        name: action_type
+        required: true
+        type: string
+      - description: 消息内容
+        in: query
+        name: content
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 消息发送成功
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 发送聊天信息
+      tags:
+      - 聊天相关接口
+  /douyin/publish/action:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 用户投稿视频
+      parameters:
+      - description: 用户token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 视频文件
+        in: formData
+        name: video
+        required: true
+        type: file
+      - description: 视频封面
+        in: formData
+        name: cover
+        required: true
+        type: file
+      - description: 视频标题
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: 视频描述
+        in: formData
+        name: desc
+        type: string
+      - description: 视频分类ID
+        in: formData
+        name: category_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"msg":"OK","data":null}'
+          schema:
+            type: string
+        "400":
+          description: '{"code":400,"msg":"请求参数错误","data":null}'
+          schema:
+            type: string
+        "401":
+          description: '{"code":401,"msg":"未登录或Token过期","data":null}'
+          schema:
+            type: string
+        "500":
+          description: '{"code":500,"msg":"服务器内部错误","data":null}'
+          schema:
+            type: string
+      summary: 视频投稿
+      tags:
+      - Video
+  /douyin/publish/list/:
+    get:
+      consumes:
+      - application/json
+      description: 根据用户ID获取视频列表
+      parameters:
+      - description: 用户ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.VideoListResponse'
+      summary: 获取指定用户的视频列表
+      tags:
+      - Video
+  /douyin/relation/action/:
+    post:
+      consumes:
+      - application/json
+      description: 用户关系操作接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        type: string
+      - description: 接收方用户 ID
+        in: query
+        name: to_user_id
+        required: true
+        type: integer
+      - description: 操作类型，1表示关注，2表示取消关注
+        in: query
+        name: action_type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户关系操作
+      tags:
+      - 关注相关接口
+  /douyin/relation/action/friend/list/:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户聊天好友列表接口
+      parameters:
+      - description: 用户 ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 好友列表
+          schema:
+            $ref: '#/definitions/model.FriendListResponse'
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - 好友相关接口
+  /douyin/relation/follower/list/:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户关注列表接口
+      parameters:
+      - description: 用户 ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 关注列表
+          schema:
+            $ref: '#/definitions/model.FollowRelationResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户关注列表
+      tags:
+      - 关注相关接口
+  /douyin/user/:
+    get:
+      consumes:
+      - application/json
+      description: 查询指定用户信息的接口
+      parameters:
+      - description: 用户 ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询到的用户信息
+          schema:
+            $ref: '#/definitions/model.UserInfoResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 查询用户信息
+      tags:
+      - 用户相关接口
+  /douyin/user/login/:
+    get:
+      consumes:
+      - application/json
+      description: 用户登录接口
+      parameters:
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserDetailResponse'
+      summary: 用户登录
+      tags:
+      - 用户相关接口
+  /douyin/user/register/:
+    post:
+      consumes:
+      - application/json
+      description: 用户注册接口
+      parameters:
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserDetailResponse'
+      summary: 用户注册
+      tags:
+      - 用户相关接口
+  /relation/fans:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户粉丝列表接口
+      parameters:
+      - description: 用户 ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 关注粉丝列表
+          schema:
+            $ref: '#/definitions/model.FollowRelationResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户粉丝列表
+      tags:
+      - 关注相关接口
 swagger: "2.0"

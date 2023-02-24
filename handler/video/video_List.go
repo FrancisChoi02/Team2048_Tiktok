@@ -15,8 +15,6 @@ import (
 // @Produce json
 // @Param user_id query int true "用户ID"
 // @Success 200 {object} model.VideoListResponse
-// @Failure 400 {object} model.Response
-// @Failure 500 {object} model.Response
 // @Router /douyin/publish/list/ [get]
 func VideoListHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据

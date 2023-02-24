@@ -66,7 +66,7 @@ func MessageHandler(c *gin.Context) {
 // @Produce application/json
 // @Param to_user_id query int true "接收方用户 ID"
 // @Security ApiKeyAuth
-// @Success 200 {object} models.Message "消息发送成功"
+// @Success 200 {object} model.Message "消息发送成功"
 // @Router /chat/history [get]
 func ChatHistoryHandler(c *gin.Context) {
 	// 1.获取请求中的参数

@@ -65,8 +65,8 @@ func RelationshipHandler(c *gin.Context) {
 // @Produce application/json
 // @Param user_id query int true "用户 ID"
 // @Security ApiKeyAuth
-// @Success 200 {object} _ResponseRelationList "关注列表"
-// @Router /douyin/relation/action/follower/list/ follows [get]
+// @Success 200 {object} model.FollowRelationResponse"关注列表"
+// @Router /douyin/relation/follower/list/ [get]
 func FollowRelationHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据
 
@@ -98,7 +98,7 @@ func FollowRelationHandler(c *gin.Context) {
 // @Produce application/json
 // @Param user_id query int true "用户 ID"
 // @Security ApiKeyAuth
-// @Success 200 {object} _ResponseRelationList "关注粉丝列表"
+// @Success 200 {object} model.FollowRelationResponse "关注粉丝列表"
 // @Router /relation/fans [get]
 func FanRelationHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据
@@ -128,7 +128,7 @@ func FanRelationHandler(c *gin.Context) {
 // @Produce application/json
 // @Param user_id query int true "用户 ID"
 // @Security ApiKeyAuth
-// @Success 200 {object} _ResponseFriendList "好友列表"
+// @Success 200 {object} model.FriendListResponse "好友列表"
 // @Router /douyin/relation/action/friend/list/ [get]
 func FriendRelationHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据

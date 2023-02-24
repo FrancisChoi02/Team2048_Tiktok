@@ -15,7 +15,7 @@ import (
 //@Produce json
 //@Param latest_time query int64 true "最新时间戳，单位秒"
 //@Param token query string false "登录token"
-//@Success 200 {object} model.FeedListResponse "请求成功"
+//@Success 200 {object} model.FeedResponse "请求成功"
 //@Router /douyin/feed/ [get]
 func FeedVideoListHandler(c *gin.Context) {
 	// 1.从上下文中获取token 和 latest_time
