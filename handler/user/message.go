@@ -2,12 +2,24 @@ package user
 
 import (
 	logic "Team2048_Tiktok/logic/user"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"strconv"
 )
 
 // MessageHandler  发送聊天信息
+// @Summary 发送聊天信息
+// @Description 发送聊天信息接口
+// @Tags 聊天相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param to_user_id query int true "接收方用户 ID"
+// @Param action_type query string true "消息操作类型"
+// @Param content query string true "消息内容"
+// @Security ApiKeyAuth
+// @Success 200 {string} string "消息发送成功"
+// @Router /douyin/message/action/ [post]
 func MessageHandler(c *gin.Context) {
 	// 1.获取请求中的参数和消息文本
 	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
@@ -16,7 +28,7 @@ func MessageHandler(c *gin.Context) {
 		ResponseMessage(c, CodeUserIdError)
 		return
 	}
-	rawToUser := c.PostForm("to_user_id") //获取发送方
+	rawToUser := c.Query("to_user_id") //获取发送方
 	tmpToUser, err := strconv.Atoi(rawToUser)
 	if err != nil {
 		ResponseMessage(c, CodeUserIdError)
@@ -24,20 +36,16 @@ func MessageHandler(c *gin.Context) {
 	}
 	toUserId := int64(tmpToUser)
 
-	actionType, err := strconv.Atoi(c.PostForm("action_type")) //获取消息操作的类型
-	if err != nil {
-		zap.L().Error("ActionType invalid", zap.Error(err))
-		ResponseMessage(c, CodeRelationTypeError)
-		return
-	}
+	actionType := c.Query("action_type") //获取消息操作的类型
 
-	if actionType != 1 {
+	fmt.Println("THIS IS actionType", actionType)
+	if actionType != "1" {
 		zap.L().Error("ActionType invalid, it has to be 1", zap.Error(err))
 		ResponseMessage(c, CodeRelationTypeError)
 		return
 	}
 
-	content := c.PostForm("content") //获取消息内容
+	content := c.Query("content") //获取消息内容
 
 	// 2.处理消息发送逻辑
 	if err := logic.SendMessage(userId, toUserId, content); err != nil {
@@ -51,6 +59,15 @@ func MessageHandler(c *gin.Context) {
 }
 
 // ChatHistoryHandler  获取聊天记录
+// @Summary 获取聊天记录
+// @Description 获取聊天记录接口
+// @Tags 聊天相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param to_user_id query int true "接收方用户 ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Message "消息发送成功"
+// @Router /chat/history [get]
 func ChatHistoryHandler(c *gin.Context) {
 	// 1.获取请求中的参数
 	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
@@ -59,23 +76,13 @@ func ChatHistoryHandler(c *gin.Context) {
 		ResponseChatHistoryError(c, CodeUserIdError)
 		return
 	}
-	rawToUser := c.PostForm("to_user_id") //获取发送方
+	rawToUser := c.Query("to_user_id") //获取发送方
 	tmpToUser, err := strconv.Atoi(rawToUser)
 	if err != nil {
 		ResponseChatHistoryError(c, CodeUserIdError)
 		return
 	}
 	toUserId := int64(tmpToUser)
-
-	/*
-		tmpPreMsgTime, err := strconv.Atoi(c.PostForm("pre_msg_time")) //获取消息操作的类型
-		if err != nil {
-			zap.L().Error("ActionType invalid", zap.Error(err))
-			ResponseChatHistoryError(c, CodeRelationTypeError)
-			return
-		}
-		preMsgTime := int64(tmpPreMsgTime)
-	*/
 
 	// 2.处理聊天记录逻辑
 	messageList, err := logic.GetMessageList(userId, toUserId)

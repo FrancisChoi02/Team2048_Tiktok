@@ -28,10 +28,15 @@ func RelationAction(userId, toUserId int64, actionType int32) error {
 	// 2.检查是否重复操作
 	recordLiked := redis.GetFollowStatus(userId, toUserId)
 
-	if actionType == recordLiked { //不允许重复操作
+	if actionType == 1 && recordLiked == 1 { //不允许重复操作
 		zap.L().Error("Double follow is not allowed", zap.Error(err))
 		return err
 	}
+	if actionType == 2 && recordLiked == 0 { //不允许重复操作
+		zap.L().Error("Double follow is not allowed", zap.Error(err))
+		return err
+	}
+
 	// 3.更新关注关系和关注、粉丝数
 	if actionType == 1 {
 		//关注，更新关注相关键值对
@@ -78,6 +83,12 @@ func FollowUser(userId, toUserId int64) (err error) {
 		return
 	}
 
+	// 3.查看有没有互关，互关则加入好友列表
+	if err = redis.CheckFriend(userId, toUserId); err != nil {
+		zap.L().Error(" redis.CheckFriend() failed", zap.Error(err))
+		return
+	}
+
 	return nil
 }
 
@@ -105,6 +116,13 @@ func UnfollowUser(userId, toUserId int64) (err error) {
 		zap.L().Error("redis.Unfollow() failed", zap.Error(err))
 		return
 	}
+
+	// 3.查看有没有互相取关，移除好友列表
+	if err = redis.CheckNotFriend(userId, toUserId); err != nil {
+		zap.L().Error("redis.CheckNotFriend() failed", zap.Error(err))
+		return
+	}
+
 	return nil
 }
 
@@ -200,12 +218,45 @@ func GetFriendList(userId int64) (*[]model.FriendResponse, error) {
 	}
 
 	// 4.补全好友列表
-	friendList, err := redis.GetFriendListDetail(tmpUserList, userId)
+	friendList, err := GetFriendListDetail(tmpUserList, userId)
 	if err != nil {
 		zap.L().Error("redis.GetFollowList() failed", zap.Error(err))
 		return nil, err
 	}
 
 	return friendList, nil
+
+}
+
+// GetFriendListDetail 获得完整的聊天好友列表
+func GetFriendListDetail(userList []model.User, userId int64) (*[]model.FriendResponse, error) {
+	var userResponseList []model.FriendResponse
+
+	for _, user := range userList {
+		userResponse, err := redis.GetFriendDetail(user)
+		if err != nil {
+			zap.L().Error("GetFriendDetail() failed", zap.Error(err))
+			return nil, err
+		}
+		//查看用户有无关注聊天列表的好友
+		record := redis.GetFollowStatus(userId, userResponse.Id)
+		if record == 1 {
+			userResponse.IsFollow = true
+		} else {
+			userResponse.IsFollow = false
+		}
+
+		///修改UserResponse类型，补充Message内容
+		tmpMessage, tmpMsgType, err := mysql.GetResentMessage(userId, userResponse.Id)
+		if err != nil {
+			zap.L().Error("GetResentMessage() failed", zap.Error(err))
+			return nil, err
+		}
+		userResponse.Message = tmpMessage
+		userResponse.MsgType = tmpMsgType
+
+		userResponseList = append(userResponseList, userResponse)
+	}
+	return &userResponseList, nil
 
 }

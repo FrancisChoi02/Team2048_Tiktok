@@ -5,30 +5,27 @@ import (
 	"Team2048_Tiktok/middleware"
 	"Team2048_Tiktok/model"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 )
 
-// UserRegisterHandler 用户注册
+// UserSignUpHandler 用户注册
+// @Summary 用户注册
+// @Description 用户注册接口
+// @Tags 用户相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param username query string true "用户名"
+// @Param password query string true "密码"
+// @Success 200 {object} model.UserDetailResponse
+// @Router /douyin/user/register/ [post]
 func UserSignUpHandler(c *gin.Context) {
 	//1. 获取参数 和 参数校验
 	var p model.ParamSignUp          //用于获取 request消息 的结构体
 	var res model.UserDetailResponse //用于返回 response消息 的结构体
 
-	if err := c.ShouldBind(&p); err != nil {
-		// 注册参数存在空值
-		// 获取validator.ValidationErrors类型的errors
-		_, ok := err.(validator.ValidationErrors)
-		if !ok {
-			zap.L().Error("Invalid param", zap.Error(err))
-			ResponseSignUp(c, res, CodeInvalidParam) //状态码为 参数错误
-			return
-		}
-		// 参数错误
-		zap.L().Error("SignUp with invalid param", zap.Error(err))
-		ResponseSignUp(c, res, CodeInvalidParam)
-		return
-	}
+	//参数位置在Query
+	p.Username = c.Query("username")
+	p.Password = c.Query("password")
 
 	//2. 将新用户信息添加到数据库中
 	tmpId, err := logic.SignUp(&p)

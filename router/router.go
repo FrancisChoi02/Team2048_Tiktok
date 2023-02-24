@@ -20,10 +20,14 @@ func SetupRouter(mode string) *gin.Engine {
 	//使用自定义中间件
 	r.Use(logger.GinLogger(), logger.GinRecovery(true))
 
+	// 将/static/cover/前缀映射到本地磁盘上的文件夹
+	r.Static("/static/cover", "C:/Users/83490/GolandProjects/Team2048_Tiktok/static/cover")
+	r.Static("/static/video", "C:/Users/83490/GolandProjects/Team2048_Tiktok/static/video")
+
 	//用户接口
 	userAPI := r.Group("/douyin/user")
 	{
-		userAPI.GET("/", middleware.JWTMiddleware(), user.UserInfoHandler)
+		r.GET("/douyin/user/", middleware.JWTMiddleware(), user.UserInfoHandler)
 		userAPI.POST("/login/", user.UserLoginHandler)
 		userAPI.POST("/register/", user.UserSignUpHandler)
 	}
@@ -48,7 +52,7 @@ func SetupRouter(mode string) *gin.Engine {
 	commentAPI.Use(middleware.JWTMiddleware())
 	{
 		commentAPI.POST("/action/", video.CommentActionHandler)
-		commentAPI.GET("/list/ ", video.CommentListHandler)
+		commentAPI.GET("/list/", video.CommentListHandler)
 	}
 
 	//社交接口

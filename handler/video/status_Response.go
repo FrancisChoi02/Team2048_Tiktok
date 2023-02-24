@@ -19,7 +19,7 @@ func ResponseFeedError(c *gin.Context, code StatusCode) {
 	var res model.FeedResponse
 	res.Code = int32(code)
 	res.Msg = code.Msg()
-	res.VideoList = new([]model.VideoResponse)
+	res.VideoList = *new([]model.VideoResponse)
 	res.NextTime = 0
 	c.JSON(http.StatusOK, res)
 }
@@ -29,7 +29,7 @@ func ResponseFeedSuccess(c *gin.Context, code StatusCode, videoList *[]model.Vid
 	var res model.FeedResponse
 	res.Code = int32(code)
 	res.Msg = code.Msg()
-	res.VideoList = videoList
+	res.VideoList = *videoList
 	res.NextTime = nextTime
 	c.JSON(http.StatusOK, res)
 }
@@ -40,7 +40,7 @@ func ResponseVideoListError(c *gin.Context, code StatusCode) {
 
 	res.Code = int32(code)
 	res.Msg = code.Msg()
-	res.VideoList = new([]model.VideoResponse)
+	res.VideoList = *new([]model.VideoResponse)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -50,7 +50,7 @@ func ResponseVideoListSuccess(c *gin.Context, code StatusCode, videoList *[]mode
 
 	res.Code = int32(code)
 	res.Msg = code.Msg()
-	res.VideoList = videoList
+	res.VideoList = *videoList
 	c.JSON(http.StatusOK, res)
 }
 
@@ -85,7 +85,7 @@ func ResponseCommentError(c *gin.Context, code StatusCode) {
 // ResponseCommentListError 返回评论失败的结果
 func ResponseCommentListError(c *gin.Context, code StatusCode) {
 	var res model.CommentListResponse
-	var tmpComment *[]model.CommentResponse
+	var tmpComment []model.CommentResponse
 
 	res.Code = int32(code)
 	res.Msg = code.Msg()
@@ -98,6 +98,6 @@ func ResponseCommentListSuccess(c *gin.Context, code StatusCode, commentList *[]
 	var res model.CommentListResponse
 	res.Code = int32(code)
 	res.Msg = code.Msg()
-	res.CommentList = commentList //返回一个空的评论数组
+	res.CommentList = *commentList //返回一个空的评论数组
 	c.JSON(http.StatusOK, res)
 }

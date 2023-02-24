@@ -47,6 +47,8 @@ func CheckUserExist(user *model.User) (err error) {
 // GetUser 获取完整的用户信息,查询用户是否存在
 func GetUser(user *model.User) (boolstring bool, err error) {
 	boolstring = false
+	fmt.Println("this is GetUser, useridIsDDDDDDDD", user.Id)
+
 	if err := DB.Where("id = ?", user.Id).First(user).Error; err != nil { //这里曾经是&user
 		if gorm.IsRecordNotFoundError(err) {
 			// 处理记录不存在错误
@@ -87,9 +89,9 @@ func GetUserList(idList []int64) ([]model.User, error) {
 func Login(user *model.User) (err error) {
 	// 1.临时结构体保存数据库查询结果
 	var tmpUser model.User
+	fmt.Println("this is mysql username", user.Name)
 
 	if err := DB.Where("name = ?", user.Name).First(&tmpUser).Error; err != nil {
-		fmt.Println("Checking Point 2")
 		if gorm.IsRecordNotFoundError(err) {
 			// 处理记录不存在错误
 			zap.L().Error("User doesn't exist", zap.Error(err))

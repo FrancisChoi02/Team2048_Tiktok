@@ -8,6 +8,17 @@ import (
 )
 
 // RelationshipHandler  用户关系操作
+// @Summary 用户关系操作
+// @Description 用户关系操作接口
+// @Tags 关注相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param to_user_id query int true "接收方用户 ID"
+// @Param action_type query int true "操作类型，1表示关注，2表示取消关注"
+// @Security ApiKeyAuth
+// @Success 200 {string} string "操作成功"
+// @Router /douyin/relation/action/ [post]
 func RelationshipHandler(c *gin.Context) {
 
 	// 1. 获取请求中的参数和视频数据
@@ -17,14 +28,14 @@ func RelationshipHandler(c *gin.Context) {
 		ResponseRelation(c, CodeUserIdError)
 		return
 	}
-	rawToUser := c.PostForm("to_user_id")
+	rawToUser := c.Query("to_user_id")
 	tmpToUser, err := strconv.Atoi(rawToUser)
 	if err != nil {
 		ResponseRelation(c, CodeUserIdError)
 		return
 	}
 
-	actionType, err := strconv.Atoi(c.PostForm("action_type")) //获取评论操作的类型
+	actionType, err := strconv.Atoi(c.Query("action_type")) //获取评论操作的类型
 	if err != nil {
 		zap.L().Error("ActionType invalid", zap.Error(err))
 		ResponseRelation(c, CodeRelationTypeError)
@@ -47,14 +58,26 @@ func RelationshipHandler(c *gin.Context) {
 }
 
 // FollowRelationHandler  获取用户关注列表
+// @Summary 获取用户关注列表
+// @Description 获取用户关注列表接口
+// @Tags 关注相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param user_id query int true "用户 ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} _ResponseRelationList "关注列表"
+// @Router /douyin/relation/action/follower/list/ follows [get]
 func FollowRelationHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据
-	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
-	userId, ok := rawId.(int64)
-	if !ok {
-		ResponseRelationListError(c, CodeUserIdError)
+
+	rawUser := c.Query("user_id")
+	tmpUser, err := strconv.Atoi(rawUser)
+	if err != nil {
+		ResponseRelation(c, CodeUserIdError)
 		return
 	}
+	userId := int64(tmpUser)
+
 	// 2. 获取关注用户列表
 	followList, err := logic.GetFollowList(userId)
 	if err != nil {
@@ -68,14 +91,26 @@ func FollowRelationHandler(c *gin.Context) {
 }
 
 // FanRelationHandler  获取用户粉丝列表
+// @Summary 获取用户粉丝列表
+// @Description 获取用户粉丝列表接口
+// @Tags 关注相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param user_id query int true "用户 ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} _ResponseRelationList "关注粉丝列表"
+// @Router /relation/fans [get]
 func FanRelationHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据
-	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
-	userId, ok := rawId.(int64)
-	if !ok {
-		ResponseRelationListError(c, CodeUserIdError)
+
+	rawUser := c.Query("user_id")
+	tmpUser, err := strconv.Atoi(rawUser)
+	if err != nil {
+		ResponseRelation(c, CodeUserIdError)
 		return
 	}
+	userId := int64(tmpUser)
+
 	// 2. 获取关注粉丝列表
 	fanList, err := logic.GetFanList(userId)
 	if err != nil {
@@ -87,15 +122,25 @@ func FanRelationHandler(c *gin.Context) {
 	ResponseRelationListSuccess(c, CodeSuccess, fanList)
 }
 
-// FriendRelationHandler  获取用户聊天好友列表
+// @Description 获取用户聊天好友列表接口
+// @Tags 好友相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param user_id query int true "用户 ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} _ResponseFriendList "好友列表"
+// @Router /douyin/relation/action/friend/list/ [get]
 func FriendRelationHandler(c *gin.Context) {
 	// 1. 获取请求中的参数和视频数据
-	rawId, _ := c.Get("user_id") // 获取上下文中保存的user_id
-	userId, ok := rawId.(int64)
-	if !ok {
-		ResponseFriendListError(c, CodeUserIdError)
+
+	rawUser := c.Query("user_id")
+	tmpUser, err := strconv.Atoi(rawUser)
+	if err != nil {
+		ResponseRelation(c, CodeUserIdError)
 		return
 	}
+	userId := int64(tmpUser)
+
 	// 2. 获取聊天好友列表
 	friendList, err := logic.GetFriendList(userId)
 	if err != nil {
@@ -103,6 +148,7 @@ func FriendRelationHandler(c *gin.Context) {
 		ResponseFriendListError(c, CodeRelationFollowError)
 		return
 	}
+
 	// 3.返回响应
 	ResponseFriendListSuccess(c, CodeSuccess, friendList)
 }

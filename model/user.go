@@ -7,9 +7,8 @@ type User struct {
 }
 
 type UserResponse struct {
-	Id             int64  `json:"user_id" `
-	Name           string `json:"username" `
-	Password       string `json:"password"`
+	Id             int64  `json:"id" `
+	Name           string `json:"name" `
 	FollowCount    int64  `json:"follow_count" `
 	FollowerCount  int64  `json:"follower_count"`
 	IsFollow       bool   `json:"is_follow " `

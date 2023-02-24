@@ -5,7 +5,6 @@ import (
 	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 	"strconv"
-	"time"
 )
 
 // FavoritePositive  点赞
@@ -81,14 +80,11 @@ func GetLikedStatus(userId, videoId int64) int32 {
 func GetUserFavorList(userId int64) ([]int64, error) {
 	userStr := strconv.Itoa(int(userId))
 
-	// 1.获取该用户的点赞列表切片
-	minScore := "0"
-	maxScore := strconv.FormatInt(time.Now().Unix(), 10) //当前时间，绝对是最新的时间
-	// 根据Score中表示的时间戳从大到小进行排序，返回对应的视频Id string切片
-	tmpFavorId, err := client.ZRevRangeByScore(model.GetRedisKey(model.KeyUserFavorZsetPrefix+userStr), redis.ZRangeBy{
-		Min: minScore,
-		Max: maxScore,
-	}).Result()
+	redisKey := model.GetRedisKey(model.KeyUserFavorZsetPrefix + userStr)
+	tmpFavorId, err := client.ZRevRange(redisKey, 0, -1).Result()
+	if err != nil {
+		return nil, err
+	}
 
 	if err != nil {
 		zap.L().Error("ZRevRangeByScore() failed", zap.Error(err))

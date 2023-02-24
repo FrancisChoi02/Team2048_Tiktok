@@ -52,7 +52,7 @@ func ResponseRelationListError(c *gin.Context, code StatusCode) {
 	res := &model.FollowRelationResponse{
 		Code:     int32(code),
 		Msg:      code.Msg(),
-		UserList: userList,
+		UserList: *userList,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -62,7 +62,7 @@ func ResponseRelationListSuccess(c *gin.Context, code StatusCode, userList *[]mo
 	res := &model.FollowRelationResponse{
 		Code:     int32(code),
 		Msg:      code.Msg(),
-		UserList: userList,
+		UserList: *userList,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -72,7 +72,7 @@ func ResponseFriendListSuccess(c *gin.Context, code StatusCode, friendList *[]mo
 	res := &model.FriendListResponse{
 		Code:       int32(code),
 		Msg:        code.Msg(),
-		FriendList: friendList,
+		FriendList: *friendList,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -83,7 +83,7 @@ func ResponseFriendListError(c *gin.Context, code StatusCode) {
 	res := &model.FriendListResponse{
 		Code:       int32(code),
 		Msg:        code.Msg(),
-		FriendList: friendList,
+		FriendList: *friendList,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -103,7 +103,7 @@ func ResponseChatHistory(c *gin.Context, code StatusCode, messageList *[]model.M
 	res := &model.ChatHistoryResponse{
 		Code:        int32(code),
 		Msg:         code.Msg(),
-		MessageList: messageList,
+		MessageList: *messageList,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -114,7 +114,7 @@ func ResponseChatHistoryError(c *gin.Context, code StatusCode) {
 	res := &model.ChatHistoryResponse{
 		Code:        int32(code),
 		Msg:         code.Msg(),
-		MessageList: messageList,
+		MessageList: *messageList,
 	}
 	c.JSON(http.StatusOK, res)
 }

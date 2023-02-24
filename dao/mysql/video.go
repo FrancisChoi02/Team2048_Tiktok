@@ -41,7 +41,7 @@ func GetVideoList(userId int64) (*[]model.Video, error) {
 
 	//设定15条视频为上限
 	err := DB.Where("user_id=?", userId).
-		Select([]string{"id", "user_id", "play_url", "cover_url", "title", "create_time"}).
+		Select([]string{"id", "user_id", "play_url", "cover_url", "title", "created_at"}).
 		Limit(15).
 		Find(videoList).Error
 
@@ -55,7 +55,7 @@ func GetFeedList(latestTime int64) (*[]model.Video, error) {
 	//按照视频投稿时间的 倒序，latestTime之后的15个视频
 	err := DB.Where("created_at<?", latestTime).
 		Order("created_at ASC").
-		Select([]string{"id", "user_id", "play_url", "cover_url", "title", "create_time"}).
+		Select([]string{"id", "user_id", "play_url", "cover_url", "title", "created_at"}).
 		Limit(15).
 		Find(videoList).Error
 

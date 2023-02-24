@@ -43,13 +43,13 @@ func SendMessage(userId, toUserId int64, content string) (err error) {
 	// 3.将Message保存到MySQL
 	if err := mysql.SaveMessage(message); err != nil {
 		zap.L().Error("mysql.SaveMessage() failed", zap.Error(err))
-		return
+		return err
 	}
 
-	// 4.将Message和收发双方的关系保存到Redis
+	// 4.将Message和双方的关系保存到Redis
 	if err := redis.SaveMessageRelation(userId, toUserId, message.Id, unixTime); err != nil {
 		zap.L().Error("mysql.SaveMessage() failed", zap.Error(err))
-		return
+		return err
 	}
 
 	return nil
@@ -82,5 +82,3 @@ func GetMessageList(userId, toUserId int64) (*[]model.Message, error) {
 	// 3.返回Message列表
 	return &messageList, nil
 }
-
-

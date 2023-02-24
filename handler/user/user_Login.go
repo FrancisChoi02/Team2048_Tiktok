@@ -4,30 +4,27 @@ import (
 	logic "Team2048_Tiktok/logic/user"
 	"Team2048_Tiktok/model"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 )
 
 // UserLoginHandler 用户登录
+// @Summary 用户登录
+// @Description 用户登录接口
+// @Tags 用户相关接口
+// @Accept application/json
+// @Produce application/json
+// @Param username query string true "用户名"
+// @Param password query string true "密码"
+// @Success 200 {object} model.UserDetailResponse
+// @Router /douyin/user/login/ [get]
 func UserLoginHandler(c *gin.Context) {
 	//1. 获取参数 和 参数校验
 	var p model.ParamSignUp          //用于获取 request消息 的结构体
 	var res model.UserDetailResponse //用于返回 response消息 的结构体
 
-	if err := c.ShouldBind(&p); err != nil {
-		// 登录参数存在空值
-		// 获取validator.ValidationErrors类型的errors
-		_, ok := err.(validator.ValidationErrors)
-		if !ok {
-			zap.L().Error("Invalid param", zap.Error(err))
-			ResponseLogin(c, res, CodeInvalidParam) //状态码为 参数错误
-			return
-		}
-		// 参数错误
-		zap.L().Error("SignUp with invalid param", zap.Error(err))
-		ResponseLogin(c, res, CodeInvalidParam)
-		return
-	}
+	//参数位置在Query
+	p.Username = c.Query("username")
+	p.Password = c.Query("password")
 
 	//2. 登录 并获取用户Id及颁发的Token
 	tmpId, token, err := logic.Login(&p) //这里应该是tmpUser.Id

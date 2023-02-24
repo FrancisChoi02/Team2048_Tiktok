@@ -10,18 +10,22 @@ import (
 )
 
 // FeedVideoListHandler 视频流
+//@Summary 获取视频流
+//@Tags Feed
+//@Produce json
+//@Param latest_time query int64 true "最新时间戳，单位秒"
+//@Param token query string false "登录token"
+//@Success 200 {object} model.FeedListResponse "请求成功"
+//@Router /douyin/feed/ [get]
 func FeedVideoListHandler(c *gin.Context) {
 	// 1.从上下文中获取token 和 latest_time
-	latestTime, err := strconv.ParseInt(c.PostForm("latest_time"), 10, 64)
+	latestTime, err := strconv.ParseInt(c.Query("latest_time"), 10, 64)
 	if err != nil {
 		zap.L().Error("latest_time invalid", zap.Error(err))
 		latestTime = time.Now().Unix() //如果latestTime为空，则返回当前时间戳
 	}
 
 	tokenStr := c.Query("token")
-	if tokenStr == "" {
-		tokenStr = c.PostForm("token")
-	}
 
 	// 2.区分有无token两种情况（有token的，加载点赞情况）
 	if tokenStr == "" {
@@ -64,9 +68,9 @@ func FeedVideoListHandler(c *gin.Context) {
 			ResponseFeedSuccess(c, CodeSuccess, videoListFull, nextTime)
 			return
 		}
-
 		//使用登录后的feed，获取user_id
 		tmpId := claims.UserId
+
 		videoListFull, nextTime, err := logic.FeedWithToken(latestTime, tmpId)
 		if err != nil {
 			zap.L().Error("logic.FeedWithToken() failed", zap.Error(err))

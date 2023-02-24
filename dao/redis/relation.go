@@ -2,6 +2,7 @@ package redis
 
 import (
 	"Team2048_Tiktok/model"
+	"fmt"
 	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 	"strconv"
@@ -23,7 +24,7 @@ func GetFollowStatus(userId, toUserId int64) int32 {
 		return 1
 	} else {
 		// 没有关注
-		return 2
+		return 0
 	}
 }
 
@@ -73,6 +74,58 @@ func Unfollow(userId, toUserId int64) error {
 	_, err := pipeline.Exec()
 	if err != nil {
 		zap.L().Error("pipeline.Exec() failed", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+// CheckFriend 查看对方有没有互关自己，如果有则加入好友列表
+func CheckFriend(userId, toUserId int64) error {
+
+	// 1.查看自己是否在对方的关注表
+	//KeyUserFollowSetPrefix  = "user:follow:"
+	followKey := model.GetRedisKey(model.KeyUserFollowSetPrefix + strconv.FormatInt(toUserId, 10))
+	isFriend, err := client.SIsMember(followKey, userId).Result()
+	if err != nil {
+		return err
+	}
+	if !isFriend {
+		return nil
+	}
+
+	// 2.将双方的Id，加入各自的好友列表键中
+	pipeline := client.TxPipeline()
+	pipeline.SAdd(model.GetRedisKey(model.KeyFriendshipSetPrefix+strconv.FormatInt(userId, 10)), toUserId)
+	pipeline.SAdd(model.GetRedisKey(model.KeyFriendshipSetPrefix+strconv.FormatInt(toUserId, 10)), userId)
+	_, err = pipeline.Exec()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CheckFriendNot 反向查看自己是否在对方的关注表中，如果不在，则将彼此移除好友列表
+func CheckNotFriend(userId, toUserId int64) error {
+
+	// 1.查看自己是否在对方的关注表
+	// KeyUserFollowSetPrefix  = "user:follow:"
+	followKey := model.GetRedisKey(model.KeyUserFollowSetPrefix + strconv.FormatInt(toUserId, 10))
+	isFriend, err := client.SIsMember(followKey, userId).Result()
+	if err != nil {
+		return err
+	}
+	if isFriend {
+		return nil
+	}
+
+	// 2.将双方的Id，从各自的好友列表键中移除
+	pipeline := client.TxPipeline()
+	pipeline.SRem(model.GetRedisKey(model.KeyFriendshipSetPrefix+strconv.FormatInt(userId, 10)), toUserId)
+	pipeline.SRem(model.GetRedisKey(model.KeyFriendshipSetPrefix+strconv.FormatInt(toUserId, 10)), userId)
+	_, err = pipeline.Exec()
+	if err != nil {
 		return err
 	}
 
@@ -181,7 +234,6 @@ func GetUserDetail(user model.User) (userResponse model.UserResponse, err error)
 	userResponse = model.UserResponse{
 		Id:             user.Id,
 		Name:           user.Name,
-		Password:       user.Password,
 		FollowCount:    followCount,
 		FollowerCount:  fansCount,
 		TotalFavorited: int64(likedCount),
@@ -290,6 +342,8 @@ func GetFriendIdList(userId int64) ([]int64, error) {
 		return nil, err
 	}
 
+	fmt.Println("THis is MEMBER listRRRRRRRRRRRRRRRRR", members)
+
 	// 2.将字符串切片调整为[]int64
 	idList := make([]int64, len(members))
 	for i, member := range members {
@@ -302,37 +356,4 @@ func GetFriendIdList(userId int64) ([]int64, error) {
 	}
 
 	return idList, nil
-}
-
-// GetFriendListDetail 获得完整的聊天好友列表
-func GetFriendListDetail(userList []model.User, userId int64) (*[]model.FriendResponse, error) {
-	var userResponseList []model.FriendResponse
-
-	for _, user := range userList {
-		userResponse, err := GetFriendDetail(user)
-		if err != nil {
-			zap.L().Error("GetFriendDetail() failed", zap.Error(err))
-			return nil, err
-		}
-		//查看用户有无关注聊天列表的好友
-		record := GetFollowStatus(userId, userResponse.Id)
-		if record == 1 {
-			userResponse.IsFollow = true
-		} else {
-			userResponse.IsFollow = false
-		}
-
-		///修改UserResponse类型，补充Message内容
-		tmpMessage, tmpMsgType, err := GetResentMessage(userId, userResponse.Id)
-		if err != nil {
-			zap.L().Error("GetResentMessage() failed", zap.Error(err))
-			return nil, err
-		}
-		userResponse.Message = tmpMessage
-		userResponse.MsgType = tmpMsgType
-
-		userResponseList = append(userResponseList, userResponse)
-	}
-	return &userResponseList, nil
-
 }

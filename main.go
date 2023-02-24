@@ -26,6 +26,7 @@ func main() {
 		fmt.Printf("load config failed, err:%v\n", err)
 		return
 	}
+
 	//加载日志器
 	if err := logger.Init(conf.Conf.LogConfig, conf.Conf.Mode); err != nil {
 		fmt.Printf("init logger failed, err:%v\n", err)
@@ -61,6 +62,7 @@ func main() {
 	// 注册路由
 	r := router.SetupRouter(conf.Conf.Mode)
 	err := r.Run(fmt.Sprintf(":%d", conf.Conf.Port))
+
 	if err != nil {
 		fmt.Printf("run server failed, err:%v\n", err)
 		return

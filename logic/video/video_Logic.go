@@ -3,7 +3,9 @@ package logic
 import (
 	"Team2048_Tiktok/dao/mysql"
 	"Team2048_Tiktok/dao/redis"
+	logic "Team2048_Tiktok/logic/user"
 	"Team2048_Tiktok/model"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,20 +27,6 @@ var (
 		".mov":  {},
 	}
 )
-
-// GetVideo 获取视频，判断对应Id是视频是否存在
-func GetVideoById(videoId int64) (model.Video, error) {
-	// 构建视频实例
-	video := model.Video{}
-	video.Id = videoId
-
-	_, err := mysql.GetVideo(&video)
-	if err != nil {
-		zap.L().Error("mysql.GetVideo() failed", zap.Error(err))
-		return video, err
-	}
-	return video, nil
-}
 
 // VideoPublish 用户视频投稿，将视频数据保存的在服务端本地
 func VideoPublish(c *gin.Context, userId int64, form *multipart.Form) (err error) {
@@ -125,7 +113,6 @@ func VideoPublish(c *gin.Context, userId int64, form *multipart.Form) (err error
 func GetVideoURL(filename, covername string) (string, string) {
 	ip := "192.168.31.169"
 	port := 8080
-
 	properFileName := fmt.Sprintf("http://%s:%d/static/video/%s", ip, port, filename)
 	properCoverName := fmt.Sprintf("http://%s:%d/static/cover/%s", ip, port, covername)
 	return properFileName, properCoverName
@@ -150,7 +137,7 @@ func GetVideoListByUserId(userId int64) (*[]model.VideoResponse, error) {
 	}
 
 	//3. 获取用户与视频的关系、视频的详细信息
-	videoListFinal, err := redis.GetVideoListDetail(videoList)
+	videoListFinal, err := GetVideoListDetail(videoList)
 	if err != nil {
 		zap.L().Error("redis.GetVideoListDetial() failed", zap.Error(err))
 		return nil, err //返回空切片
@@ -172,7 +159,7 @@ func FeedWithNoToken(latestTime int64) (*[]model.VideoResponse, int64, error) {
 	nextTime := (*feedList)[0].CreatedAt
 
 	// 3. 获取视频的详细信息
-	videoListFinal, err := redis.GetFeedListWithNoToken(feedList)
+	videoListFinal, err := GetFeedListWithNoToken(feedList)
 	if err != nil {
 		zap.L().Error("redis.GetFeedListWithNoToken() failed", zap.Error(err))
 		return nil, 0, err //返回空切片
@@ -193,11 +180,212 @@ func FeedWithToken(latestTime, userId int64) (*[]model.VideoResponse, int64, err
 	nextTime := (*feedList)[0].CreatedAt
 
 	// 3. 获取用户与视频的点赞关系、视频的详细信息
-	videoListFinal, err := redis.GetFeedListWithToken(userId, feedList)
+	videoListFinal, err := GetFeedListWithToken(userId, feedList)
 	if err != nil {
 		zap.L().Error("redis.GetFeedListWithNoToken() failed", zap.Error(err))
 		return nil, 0, err //返回空切片
 	}
 
 	return videoListFinal, nextTime, nil
+}
+
+// GetFeedListWithNoToken  获取未登录用户的视频流
+func GetFeedListWithNoToken(feedList *[]model.Video) (*[]model.VideoResponse, error) {
+	// 1.判断视频列表是否为空
+	if feedList == nil {
+		err := errors.New("videoList has nothing")
+		zap.L().Error("videoList has nothing")
+		return nil, err
+	}
+
+	// 2.构建VideoResponse数组
+	size := len(*feedList)
+	feedListFull := make([]model.VideoResponse, size)
+
+	//	3.每个视频单独处理
+	for i, video := range *feedList {
+		tmpVideoID := strconv.Itoa(int(video.Id))
+
+		// a.获取视频发布者信息
+		videoUser := &model.User{}
+		videoUser.Id = video.UserId
+
+		_, err := mysql.GetUser(videoUser)
+		if err != nil {
+			zap.L().Error(" GetUser() failed", zap.Error(err))
+		}
+
+		// 获取用户完整的信息
+		user, err := logic.GetUserDetail(*videoUser)
+		commentCount, favoriteCount, _ := redis.GetFeedListStatus("0", tmpVideoID)
+
+		// 用户未登录，默认为false
+		feedListFull[i].IsFavorite = false
+		feedListFull[i].Author = user
+
+		// b.获取视频的评论数
+		feedListFull[i].CommentCount = commentCount
+
+		// c.获取视频的点赞数
+		feedListFull[i].FavoriteCount = favoriteCount
+
+		// d.组装videoListFull单元
+		assembleVideoListFull(&video, i, feedListFull)
+	}
+	return &feedListFull, nil
+
+}
+
+// GetFeedListWithToken  获取登录用户的视频流
+func GetFeedListWithToken(userId int64, feedList *[]model.Video) (*[]model.VideoResponse, error) {
+	// 1.判断视频列表是否为空
+	if feedList == nil {
+		err := errors.New("videoList has nothing")
+		zap.L().Error("videoList has nothing")
+		return nil, err
+	}
+
+	// 2.构建VideoResponse数组
+	size := len(*feedList)
+	feedListFull := make([]model.VideoResponse, size)
+
+	//	3.每个视频单独处理
+	for i, video := range *feedList {
+		tmpVideoID := strconv.Itoa(int(video.Id))
+
+		// a.获取视频发布者信息
+		videoUser := &model.User{}
+		videoUser.Id = video.UserId
+
+		_, err := mysql.GetUser(videoUser)
+		if err != nil {
+			zap.L().Error(" GetUser() failed", zap.Error(err))
+		}
+
+		// 获取用户完整的信息
+		user, err := logic.GetUserDetail(*videoUser)
+
+		//查看当前用户 给 当前视频 的赞记录
+		tmpUserID := strconv.Itoa(int(userId))
+		commentCount, favoriteCount, ok := redis.GetFeedListStatus(tmpUserID, tmpVideoID)
+
+		if ok == 1 {
+			feedListFull[i].IsFavorite = true
+		} else {
+			feedListFull[i].IsFavorite = false
+		}
+
+		// b.获取视频的评论数
+		feedListFull[i].CommentCount = commentCount
+
+		// c.获取视频的点赞数
+		feedListFull[i].FavoriteCount = favoriteCount
+
+		// d.组装videoListFull单元
+		feedListFull[i].Author = user
+		assembleVideoListFull(&video, i, feedListFull)
+	}
+	return &feedListFull, nil
+}
+
+// GetVideoDetail 返回视频的完整数据
+func GetVideoDetail(tmpVideo *model.Video) (*model.VideoResponse, error) {
+	tmpVideoID := strconv.Itoa(int(tmpVideo.Id))
+	videoFull := new(model.VideoResponse)
+
+	tmpUserID := "0"
+	commentCount, favoriteCount, _ := redis.GetFeedListStatus(tmpVideoID, tmpUserID)
+	// a.获取视频的点赞数
+	videoFull.FavoriteCount = favoriteCount
+
+	// b.获取视频的评论数
+	videoFull.CommentCount = commentCount
+
+	// c.点赞设置为有
+	videoFull.IsFavorite = true
+	tmpUser := &model.User{}
+	tmpUser.Id = tmpVideo.UserId
+
+	_, err := mysql.GetUser(tmpUser)
+	if err != nil {
+		zap.L().Error(" GetUser() failed", zap.Error(err))
+	}
+
+	// 获取用户完整的信息
+	user, err := logic.GetUserDetail(*tmpUser)
+
+	// d.组装videoListFull单元
+	videoFull.Author = user
+	assembleVideoFull(tmpVideo, videoFull)
+
+	return videoFull, nil
+}
+
+// GetVideoListDetail 返回用户投稿视频列表的完整数据
+func GetVideoListDetail(videoList *[]model.Video) (*[]model.VideoResponse, error) {
+	// 1.判断视频列表是否为空
+	if videoList == nil {
+		err := errors.New("videoList has nothing")
+		zap.L().Error("videoList has nothing")
+		return nil, err
+	}
+
+	// 2.构建VideoResponse数组
+	size := len(*videoList)
+	videoListFull := make([]model.VideoResponse, size)
+
+	//	3.每个视频单独处理
+	for i, video := range *videoList {
+		tmpVideoID := strconv.Itoa(int(video.Id))
+
+		// a.查看登录的用户有没有点赞当前视频
+		tmpUser := &model.User{}
+		tmpUser.Id = video.UserId
+
+		_, err := mysql.GetUser(tmpUser)
+		if err != nil {
+			zap.L().Error(" GetUser() failed", zap.Error(err))
+		}
+
+		//查看当前用户 给 当前视频 的赞记录
+		tmpUserID := strconv.Itoa(int(tmpUser.Id))
+		commentCount, favoriteCount, ok := redis.GetFeedListStatus(tmpVideoID, tmpUserID)
+
+		if ok == 1 {
+			videoListFull[i].IsFavorite = true
+		} else {
+			videoListFull[i].IsFavorite = false
+		}
+
+		// b.获取视频的评论数
+		videoListFull[i].CommentCount = commentCount
+
+		// c.获取视频的点赞数
+		videoListFull[i].FavoriteCount = favoriteCount
+
+		// d.组装videoListFull单元
+		// 获取用户完整的信息
+		user, err := logic.GetUserDetail(*tmpUser)
+		videoListFull[i].Author = user
+		assembleVideoListFull(&video, i, videoListFull)
+	}
+	return &videoListFull, nil
+}
+
+// assembleVideoListFull  组装videoListFull单元
+func assembleVideoListFull(video *model.Video, index int, videoListFull []model.VideoResponse) {
+	videoListFull[index].Id = video.Id
+	videoListFull[index].PlayUrl = video.PlayUrl
+	videoListFull[index].CoverUrl = video.CoverUrl
+	videoListFull[index].Title = video.Title
+	videoListFull[index].CreatedAt = video.CreatedAt
+}
+
+// assembleVideoFull  组装视频
+func assembleVideoFull(video *model.Video, videoFull *model.VideoResponse) {
+	videoFull.Id = video.Id
+	videoFull.PlayUrl = video.PlayUrl
+	videoFull.CoverUrl = video.CoverUrl
+	videoFull.Title = video.Title
+	videoFull.CreatedAt = video.CreatedAt
 }

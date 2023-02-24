@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"Team2048_Tiktok/dao/redis"
 	"Team2048_Tiktok/model"
 	"errors"
 	"github.com/jinzhu/gorm"
@@ -67,13 +68,16 @@ func GetCommentResponseList(commentIdList []int64) (*[]model.CommentResponse, er
 			zap.L().Error("User do not exist")
 		}
 
+		//补全用户信息
+		userFulll, err := redis.GetUserDetail(*user)
+
 		tmpTime := time.Unix(comment.CreatedAt, 0) //将unix时间转回 time.Time
 		dateStr := tmpTime.Format("01-02")
 
 		//组装返回的commentResponse并赋值给当前单元
 		commentResponse := new(model.CommentResponse)
 		commentResponse.Id = comment.Id
-		commentResponse.User = *user
+		commentResponse.User = userFulll
 		commentResponse.Content = comment.Content
 		commentResponse.CreateDate = dateStr
 

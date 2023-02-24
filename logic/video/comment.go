@@ -19,6 +19,9 @@ func AddComment(userId, videoId int64, commentText string) (commentResponse mode
 		return
 	}
 
+	//补全用户信息
+	userFulll, err := redis.GetUserDetail(*tmpUser)
+
 	tmpVideo := new(model.Video)
 	tmpVideo.Id = videoId
 	_, err = mysql.GetVideo(tmpVideo)
@@ -42,7 +45,7 @@ func AddComment(userId, videoId int64, commentText string) (commentResponse mode
 
 	if err := mysql.PostComment(comment); err != nil {
 		zap.L().Error("mysql.PostComment() failed", zap.Error(err))
-		return
+		return commentResponse, err
 	}
 
 	// 3.将comment的关系信息装入Redis
@@ -54,7 +57,7 @@ func AddComment(userId, videoId int64, commentText string) (commentResponse mode
 
 	// 4.组装commentResponse结构体，并进行返回
 	commentResponse.Id = commentId
-	commentResponse.User = *tmpUser
+	commentResponse.User = userFulll
 	commentResponse.Content = commentText
 	commentResponse.CreateDate = dateStr
 
@@ -100,11 +103,14 @@ func RemoveComment(videoId, commentId int64) (commentResponse model.CommentRespo
 		zap.L().Error("mysql.GetUser() failed", zap.Error(err))
 		return
 	}
+	//补全用户信息
+	userFulll, err := redis.GetUserDetail(*tmpUser)
+
 	tmpTime := time.Unix(tmpComment.CreatedAt, 0) //将unix时间转回 time.Time
 	dateStr := tmpTime.Format("01-02")
 
 	commentResponse.Id = commentId
-	commentResponse.User = *tmpUser
+	commentResponse.User = userFulll
 	commentResponse.CreateDate = dateStr
 
 	return commentResponse, nil
