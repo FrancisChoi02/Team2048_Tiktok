@@ -31,11 +31,17 @@
 功能介绍
 
 本项目主要实现以下功能：
+
 视频：视频推送、视频投稿、发布列表
+
 用户：用户注册、用户登录、用户信息
+
 点赞：点赞操作、点赞列表
+
 评论：评论操作、评论列表
+
 关注：关注操作、关注列表、粉丝列表
+
 
 
 数据库表设计
@@ -47,17 +53,31 @@
 项目启动
 
 下载代码：git clone https://github.com/FrancisChoi02/Team2048_Tiktok/.git
+
 进入项目目录：cd your_repository
+
 安装依赖：go mod init
+
 配置环境变量：将MySQL数据库的地址、用户名和密码配置到环境变量中
+
 启动项目：go run ./main.go
+
+
+
+
 
 
 Swagger接口文档启动
 
 本项目使用Swagger生成接口文档，启动步骤如下：
+
 安装Swagger：go get -u github.com/swaggo/swag/cmd/swag
+
 为接口代码添加注释
+
 在gin框架路由中进行注册：r.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
+
 生成Swagger文档: swag init
+
 访问文档：运行项目，在浏览器打开http://localhost:8080/swagger/index.html
+
