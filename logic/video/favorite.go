@@ -4,7 +4,6 @@ import (
 	"Team2048_Tiktok/dao/mysql"
 	"Team2048_Tiktok/dao/redis"
 	"Team2048_Tiktok/model"
-	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -70,8 +69,6 @@ func GetFavorListByUserId(userId int64) (*[]model.VideoResponse, error) {
 	// 2.根据UserId，从Redis中获取User的喜欢视频的Id列表
 	favorList, err := redis.GetUserFavorList(userId)
 
-	fmt.Println("This is user's Favorite  !!!!!!!!!", favorList)
-
 	if err != nil {
 		zap.L().Error("redis.GetUserFavorList() failed", zap.Error(err))
 		return nil, err
@@ -83,8 +80,6 @@ func GetFavorListByUserId(userId int64) (*[]model.VideoResponse, error) {
 		zap.L().Error("mysql.GetUserFavorListFull() failed", zap.Error(err))
 		return nil, err
 	}
-
-	fmt.Println("This is user's FuLL  !!!!!!!!!", favorListFull)
 
 	return favorListFull, nil
 }

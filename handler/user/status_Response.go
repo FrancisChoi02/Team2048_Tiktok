@@ -94,7 +94,6 @@ func ResponseMessage(c *gin.Context, code StatusCode) {
 		StatusCode: int32(code),
 		StatusMsg:  code.Msg(),
 	}
-
 	c.JSON(http.StatusOK, res)
 }
 
