@@ -117,7 +117,6 @@ func RemoveComment(videoId, commentId int64) (commentResponse model.CommentRespo
 
 }
 
-// GetCommentList 获取评论列表
 func GetCommentList(videoId int64) (commentResponseList *[]model.CommentResponse, err error) {
 	// 1.验证videoId的合法性
 	tmpVideo := new(model.Video)

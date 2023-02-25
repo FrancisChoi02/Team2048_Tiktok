@@ -9,13 +9,6 @@ import (
 	"Team2048_Tiktok/model"
 	"Team2048_Tiktok/router"
 	"fmt"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"runtime"
-	"runtime/pprof"
-	"time"
 )
 
 // @title Team2048_Tiktok 项目接口文档
@@ -27,11 +20,6 @@ import (
 // @host 127.0.0.1:8080
 // @BasePath
 func main() {
-
-	// 性能分析与检测
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
 
 	// 加载配置
 	if err := conf.Init(); err != nil {
@@ -79,19 +67,4 @@ func main() {
 		fmt.Printf("run server failed, err:%v\n", err)
 		return
 	}
-
-	//pprof采样器
-	f, err := os.Create("cpu.pprof")
-	if err != nil {
-		log.Fatal(err)
-	}
-	pprof.StartCPUProfile(f)
-	defer pprof.StopCPUProfile()
-
-	// increase the CPU profiling rate
-	runtime.SetCPUProfileRate(100)
-
-	// 增加pprof的采样时间
-	time.Sleep(120 * time.Second)
-
 }
