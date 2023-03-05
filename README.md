@@ -3,7 +3,7 @@
 
 本项目是基于HTTP框架Gin、ORM框架GORM的极简版抖音服务端项目
 
-#技术选型
+# 技术选型
 - 项目代码采用**handler层**、**logic层**、**dao层**三层结构
 - 使用**Snowflake**分布式ID生成器，它可以生成全局唯一、有序、可排序的ID
 - 使用**GORM**操作MySQL数据区，并且优化GORM操作达到**防止SQL注入**效果
@@ -15,7 +15,7 @@
 - 进行了**单元测试**，并且项目内置生成项目的**Swagger接口文档**
 
 
-#项目架构
+# 项目架构
 
 ![tiktok架构](https://user-images.githubusercontent.com/114276877/221083731-158a8876-d2c6-4d7e-af2a-1faa87921296.png)
 将项目的处理逻辑分散到每一层，明确每一层的职责：
@@ -43,7 +43,7 @@
 
 
 
-#数据库表设计
+# 数据库表设计
 
 ![Tiktok数据库ER图](https://user-images.githubusercontent.com/114276877/221083992-43e518c1-c5d1-4821-b42f-e1a6937f0e33.png)
 ![image](https://user-images.githubusercontent.com/114276877/221084025-92101067-f6b3-4a46-b238-12ba67c2a7b3.png)
