@@ -3,6 +3,9 @@
 
 本项目是基于HTTP框架Gin、ORM框架GORM的极简版抖音服务端项目
 
+# 项目文档
+https://xd2cyqtv7f.feishu.cn/docx/SkyMd5jVkoVv0vxjlrHcwB6hnog
+
 # 技术选型
 - 项目代码采用**handler层**、**logic层**、**dao层**三层结构
 - 使用**Snowflake**分布式ID生成器，它可以生成全局唯一、有序、可排序的ID
